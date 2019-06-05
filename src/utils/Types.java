@@ -196,7 +196,8 @@ public class Types {
         ACTION_DOWN(2),
         ACTION_LEFT(3),
         ACTION_RIGHT(4),
-        ACTION_BOMB(5);
+        ACTION_BOMB(5),
+        ACTION_DEFUSE(6);
 
         private int key;
         ACTIONS(int numVal) {  this.key = numVal; }
@@ -215,6 +216,7 @@ public class Types {
             allActions.add(ACTION_LEFT);
             allActions.add(ACTION_RIGHT);
             allActions.add(ACTION_BOMB);
+            allActions.add(ACTION_DEFUSE);
             return allActions;
         }
 
