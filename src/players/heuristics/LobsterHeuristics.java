@@ -1,7 +1,10 @@
 package players.heuristics;
 
+import core.ForwardModel;
 import core.GameState;
+import objects.GameObject;
 import utils.Types;
+import utils.Vector2d;
 
 public class LobsterHeuristics extends StateHeuristic {
     private BoardStats rootBoardStats;
@@ -41,8 +44,10 @@ public class LobsterHeuristics extends StateHeuristic {
         double FACTOR_WOODS = 0.1;
         double FACTOR_CANKCIK = 0.15;
         double FACTOR_BLAST = 0.15;
+        GameState gameState;
 
         BoardStats(GameState gs) {
+            gameState = gs;
             nEnemies = gs.getAliveEnemyIDs().size();
 
             // Init weights based on game mode
@@ -81,6 +86,15 @@ public class LobsterHeuristics extends StateHeuristic {
          * @param futureState the stats of the board at the end of the rollout.
          * @return a score [0, 1]
          */
+
+        boolean isBlockerTile(Types.TILETYPE type)
+        {
+            if(type == Types.TILETYPE.FLAMES || type == Types.TILETYPE.RIGID)
+                return true;
+
+            return false;
+        }
+
         double score(BoardStats futureState)
         {
             int diffTeammates = futureState.nTeammates - this.nTeammates;
@@ -89,8 +103,35 @@ public class LobsterHeuristics extends StateHeuristic {
             int diffCanKick = futureState.canKick ? 1 : 0;
             int diffBlastStrength = futureState.blastStrength - this.blastStrength;
 
-            return (diffEnemies / 3.0) * FACTOR_ENEMY + diffTeammates * FACTOR_TEAM + (diffWoods / maxWoods) * FACTOR_WOODS
+            double score = (diffEnemies / 3.0) * FACTOR_ENEMY + diffTeammates * FACTOR_TEAM + (diffWoods / maxWoods) * FACTOR_WOODS
                     + diffCanKick * FACTOR_CANKCIK + (diffBlastStrength / maxBlastStrength) * FACTOR_BLAST;
+
+            int playerId = futureState.gameState.getPlayerId();
+            Types.TILETYPE[][] tiles = futureState.gameState.getBoard();
+
+            int xLength = tiles.length;
+            int yLength = tiles[0].length;
+            Vector2d pos = gameState.getPosition();
+
+            int numOccupiedTiles = 0;
+            if(pos.x == 0 || isBlockerTile(tiles[pos.x-1][pos.y]))
+                    numOccupiedTiles++;
+
+            if(pos.y == 0 || isBlockerTile(tiles[pos.x][pos.y-1]))
+                numOccupiedTiles++;
+
+            if(pos.x == xLength-1 || isBlockerTile(tiles[pos.x+1][pos.y]))
+                numOccupiedTiles++;
+
+            if(pos.y == yLength-1 || isBlockerTile(tiles[pos.x][pos.y+1]))
+                numOccupiedTiles++;
+
+            if(numOccupiedTiles >=3)
+                score = 0;
+
+
+            return score;
+
         }
     }
 }
