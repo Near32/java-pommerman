@@ -81,7 +81,7 @@ public class LobsterHeuristics extends StateHeuristic {
 
         boolean isBlockerTile(Types.TILETYPE type)
         {
-            if(type == Types.TILETYPE.FLAMES || type == Types.TILETYPE.RIGID)
+            if(type == Types.TILETYPE.FLAMES || type == Types.TILETYPE.RIGID || type == Types.TILETYPE.BOMB)
                 return true;
 
             return false;
@@ -131,7 +131,7 @@ public class LobsterHeuristics extends StateHeuristic {
             double score = (diffEnemies / 3.0) * FACTOR_ENEMY + diffTeammates * FACTOR_TEAM + (diffWoods / maxWoods) * FACTOR_WOODS
                     + diffCanKick * FACTOR_CANKCIK + (diffBlastStrength / maxBlastStrength) * FACTOR_BLAST;
 
-            if(isBlockerPos(futureState))
+            if(isBlockerPos(futureState) || isBlockerPos(this))
                 score = 0;
 
             return score;
