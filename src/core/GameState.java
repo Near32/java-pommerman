@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static utils.Types.NUM_ACTIONS;
+import static utils.Types.WALL_CLOCK;
 
 @SuppressWarnings("unused")
 public class GameState {
@@ -137,12 +138,11 @@ public class GameState {
         {
             model.next(actions);
             tick++;
-            Types.WALL_CLOCK = tick; //TODO here is the master wall clock
 
             if (tick == Types.MAX_GAME_TICKS)
                 Types.getGameConfig().processTimeout(gameMode, getAgents(), getAliveAgents());
-
             return true;
+
         }
 
         return false;

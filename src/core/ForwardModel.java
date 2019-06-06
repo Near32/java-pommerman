@@ -302,36 +302,7 @@ public class ForwardModel {
             }
         }
 
-        // add a flame wall every WALL_SPEED ticks.
-        // If there is already a flame, the wall won't override its life.
 
-        if (Types.WALL_CLOCK % Types.WALL_SPEED == 0)
-        {
-            int currentLayer = Types.WALL_CLOCK / Types.WALL_SPEED;
-            if(currentLayer != 0)
-            {
-                currentLayer += WALL_INCREASE;
-            }
-
-            for (int x = 0; x < Types.BOARD_SIZE; x++)
-            {
-                for (int y = 0; y < BOARD_SIZE; y++)
-                {
-                    if (x == currentLayer || x == (Types.BOARD_SIZE-1) - currentLayer || y == currentLayer || y == (Types.BOARD_SIZE-1) - currentLayer)
-                    {
-                        addFlame(x, y, Types.WALL_LIFE);
-                        for (GameObject flame_obj : flames)
-                        {
-                            Flame flame = (Flame)flame_obj;
-                            if(flame.getPosition().x == x && flame.getPosition().y == y)
-                            {
-                                flame.setLife(Types.WALL_LIFE);
-                            }
-                        }
-                    }
-                }
-            }
-        }
 
 
         // 3. Agents already have desired positions set from GameState call according to their chosen actions
@@ -438,6 +409,21 @@ public class ForwardModel {
             bombDiffusionCounter[position.y][position.x] = bomb.getDiffusionCounter();
         }
 
+        // add a flame wall every WALL_SPEED ticks.
+        // If there is already a flame, the wall won't override its life.
+
+        //update the wall clock
+        // add a flame wall every WALL_SPEED ticks.
+        WALL_CLOCK++;
+        if (WALL_CLOCK == WALL_SPEED)
+        {
+            WALL_LAYER = WALL_LAYER+1;
+            addWallOfFire(WALL_LAYER);
+            System.out.println(WALL_CLOCK);
+            System.out.println(WALL_LAYER);
+            WALL_CLOCK = 0;
+        }
+
         // 16. Logging
         if(trueModel && LOGGING_STATISTICS) {
             for (GameObject p : aliveAgents) {
@@ -456,6 +442,31 @@ public class ForwardModel {
         }
     }
 
+    private void addWallOfFire(int wall_layer)
+    {
+        System.out.println("Add wall of fire!");
+        for (int x = 0; x < Types.BOARD_SIZE; x++)
+        {
+            for (int y = 0; y < BOARD_SIZE; y++)
+            {
+                if (x == wall_layer - 1 || x == (Types.BOARD_SIZE) - wall_layer || y == wall_layer -1 || y == (Types.BOARD_SIZE) - wall_layer)
+                {
+                    // flames are added here
+                    addFlame(x, y, Types.WALL_LIFE);
+                    //flame life is overwritten here (if there is another flame)
+                    for (GameObject flame_obj : flames)
+                    {
+                        Flame flame = (Flame)flame_obj;
+                        if(flame.getPosition().x == x && flame.getPosition().y == y)
+                        {
+                            flame.setLife(Types.WALL_LIFE);
+                        }
+                    }
+
+                }
+            }
+        }
+    }
     /**
      * Handles the movement of bombs, including kicking them if the agent can do so.
      */

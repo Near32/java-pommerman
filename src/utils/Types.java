@@ -15,9 +15,9 @@ public class Types {
     public static int BOMB_DIFFUSION_THRESHOLD = 4; //Ticks until a bomb is diffused.
     public static int FLAME_LIFE = 5;               //Ticks until a flame dissappears.
     public static int WALL_LIFE = MAX_GAME_TICKS;   //infinite wall time
-    public static int WALL_SPEED = 50;              //TODO do the math to implement it depending on the board size
-    public static int WALL_INCREASE= -3;
-    public static int WALL_CLOCK = 1;               //internal wall clock
+    public static int WALL_SPEED = 100000;              //TODO do the math to implement it depending on the board size
+    public static int WALL_LAYER = 0;
+    public static int WALL_CLOCK = 0;               //internal wall clock
     public static int DEFAULT_BOMB_BLAST = 2;       //Default bombs create flames with this range.
     public static int DEFAULT_BOMB_AMMO = 1;        //Default number of simultaneous bombs an agent can put.
     public static boolean DEFAULT_BOMB_KICK = false;//Can agents kick bomb by default?
