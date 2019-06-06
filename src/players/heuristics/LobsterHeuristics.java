@@ -44,7 +44,6 @@ public class LobsterHeuristics extends StateHeuristic {
         double FACTOR_WOODS = 0.1;
         double FACTOR_CANKCIK = 0.15;
         double FACTOR_BLAST = 0.15;
-        GameState gameState;
 
         BoardStats(GameState gs) {
             nEnemies = gs.getAliveEnemyIDs().size();
@@ -105,12 +104,27 @@ public class LobsterHeuristics extends StateHeuristic {
         }
 
 
-        boolean isBlockerTile(Types.TILETYPE type)
+        boolean isBlockerTile(Types.TILETYPE type, GameState gs)
         {
-            if(type == Types.TILETYPE.FLAMES || type == Types.TILETYPE.RIGID || type == Types.TILETYPE.BOMB || type == Types.TILETYPE.WOOD)
-                return true;
+            switch(type)
+            {
+                case FLAMES:
+                case RIGID:
+                case BOMB:
+                case WOOD:
+                    return true;
+                default:
+                {
+                    Types.TILETYPE[] enemyTiles = gs.getEnemies();
+                    for(Types.TILETYPE enemyTile : enemyTiles)
+                    {
+                        if(enemyTile == type)
+                            return true;
+                    }
+                    return false;
+                }
+            }
 
-            return false;
         }
 
         int countBlockedPositions(GameState gs)
@@ -123,16 +137,16 @@ public class LobsterHeuristics extends StateHeuristic {
             Vector2d pos = gs.getPosition();
 
             int numOccupiedTiles = 0;
-            if(pos.x == 0 || isBlockerTile(tiles[pos.x-1][pos.y]))
+            if(pos.x == 0 || isBlockerTile(tiles[pos.x-1][pos.y], gs))
                 numOccupiedTiles++;
 
-            if(pos.y == 0 || isBlockerTile(tiles[pos.x][pos.y-1]))
+            if(pos.y == 0 || isBlockerTile(tiles[pos.x][pos.y-1], gs))
                 numOccupiedTiles++;
 
-            if(pos.x == xLength-1 || isBlockerTile(tiles[pos.x+1][pos.y]))
+            if(pos.x == xLength-1 || isBlockerTile(tiles[pos.x+1][pos.y], gs))
                 numOccupiedTiles++;
 
-            if(pos.y == yLength-1 || isBlockerTile(tiles[pos.x][pos.y+1]))
+            if(pos.y == yLength-1 || isBlockerTile(tiles[pos.x][pos.y+1], gs))
                 numOccupiedTiles++;
 
             return numOccupiedTiles;
