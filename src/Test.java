@@ -19,7 +19,7 @@ public class Test {
         // Game parameters
         long seed = System.currentTimeMillis();
         int boardSize = Types.BOARD_SIZE;
-        Types.GAME_MODE gameMode = Types.GAME_MODE.TEAM_RANDOM;
+        Types.GAME_MODE gameMode = Types.GAME_MODE.FFA_TELEPORT;
         boolean useSeparateThreads = false;                 //true may be unstable, false is recommended.
 
         Game game = new Game(seed, boardSize, gameMode, "");
@@ -37,6 +37,14 @@ public class Test {
         MCTSParams mctsParams = new MCTSParams();
         mctsParams.stop_type = mctsParams.STOP_ITERATIONS;
         mctsParams.heuristic_method = mctsParams.CUSTOM_HEURISTIC;
+
+        // Define our heuristics
+        MCTSParams OurMCTSParams = new MCTSParams();
+        OurMCTSParams.K = 10;//Math.sqrt(2);
+        OurMCTSParams.rollout_depth = 6;
+        OurMCTSParams.stop_type = mctsParams.STOP_ITERATIONS;
+        OurMCTSParams.heuristic_method = mctsParams.OUR_HEURISTIC;
+
         RHEAParams rheaParams = new RHEAParams();
         rheaParams.heurisic_type = Constants.CUSTOM_HEURISTIC;
 
@@ -45,7 +53,7 @@ public class Test {
 //        players.add(new HumanPlayer(ki1, playerID++));
 //        players.add(new HumanPlayer(ki2, playerID++));
 //        players.add(new DoNothingPlayer(playerID++));
-        players.add(new SimpleEvoAgent(seed, playerID++));
+        players.add(new MCTSPlayer(seed, playerID++, OurMCTSParams));
         players.add(new SimpleEvoAgent(seed, playerID++));
         players.add(new SimpleEvoAgent(seed, playerID++));
         players.add(new RHEAPlayer(seed, playerID++, rheaParams));

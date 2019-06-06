@@ -304,7 +304,7 @@ public class ForwardModel {
 
         // add a flame wall every WALL_SPEED ticks.
         // If there is already a flame, the wall won't override its life.
-
+        /*
         if (Types.WALL_CLOCK % Types.WALL_SPEED == 0)
         {
             int currentLayer = Types.WALL_CLOCK / Types.WALL_SPEED;
@@ -332,7 +332,7 @@ public class ForwardModel {
                 }
             }
         }
-
+        */
 
         // 3. Agents already have desired positions set from GameState call according to their chosen actions
         // 4. Tick bombs, they set their desired position in the tick() method as well as their life. They also

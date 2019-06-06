@@ -11,11 +11,11 @@ public class Types {
 
     // Game Configuration constants.
     public static int MAX_GAME_TICKS = 800;         //Maximum duration of the game.
-    public static int BOMB_LIFE = 15;               //Ticks until a bomb explodes.
-    public static int BOMB_DIFFUSION_THRESHOLD = 4; //Ticks until a bomb is diffused.
+    public static int BOMB_LIFE = 10;               //Ticks until a bomb explodes.
+    public static int BOMB_DIFFUSION_THRESHOLD = 2; //Ticks until a bomb is diffused.
     public static int FLAME_LIFE = 5;               //Ticks until a flame dissappears.
     public static int WALL_LIFE = MAX_GAME_TICKS;   //infinite wall time
-    public static int WALL_SPEED = 50;              //TODO do the math to implement it depending on the board size
+    public static int WALL_SPEED = 20;              //TODO do the math to implement it depending on the board size
     public static int WALL_INCREASE= -3;
     public static int WALL_CLOCK = 1;               //internal wall clock
     public static int DEFAULT_BOMB_BLAST = 2;       //Default bombs create flames with this range.
@@ -27,9 +27,9 @@ public class Types {
     private static IGameConfig gameConfig = new OriginalGameConfig();
 
     //Board configuration constants.
-    public static int BOARD_SIZE = 16;              //Size of the board (n x n).
-    public static int BOARD_NUM_RIGID = 10;         //Number of rigid blocks to put in the level.
-    public static int BOARD_NUM_WOOD = 10;          //Number of wooden (destroyable) blocks for the level.
+    public static int BOARD_SIZE = 11;              //Size of the board (n x n).
+    public static int BOARD_NUM_RIGID = 20;         //Number of rigid blocks to put in the level.
+    public static int BOARD_NUM_WOOD = 20;          //Number of wooden (destroyable) blocks for the level.
     public static int BOARD_NUM_ITEMS = 5;         //Number of items to put in level.
     public static int MAX_INACCESIBLE_TILES = 4;    //Number of inaccessible parts of the level allowed.
     public static int CORNER_DISTANCE = 4;          //Distance to the corner, in tiles, of the starting agent position.

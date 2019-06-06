@@ -1,9 +1,7 @@
 package players.mcts;
 
 import core.GameState;
-import players.heuristics.AdvancedHeuristic;
-import players.heuristics.CustomHeuristic;
-import players.heuristics.StateHeuristic;
+import players.heuristics.*;
 import utils.ElapsedCpuTimer;
 import utils.Types;
 import utils.Utils;
@@ -77,6 +75,8 @@ public class SingleTreeNode
         this.rootState = gs;
         if (params.heuristic_method == params.CUSTOM_HEURISTIC)
             this.rootStateHeuristic = new CustomHeuristic(gs);
+        else if (params.heuristic_method == params.OUR_HEURISTIC) // New method: combined heuristics
+            this.rootStateHeuristic = new OurHeuristic();
         else if (params.heuristic_method == params.ADVANCED_HEURISTIC) // New method: combined heuristics
             this.rootStateHeuristic = new AdvancedHeuristic(gs, m_rnd);
     }
