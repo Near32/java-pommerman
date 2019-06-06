@@ -9,7 +9,8 @@ import utils.Vector2d;
 public class LobsterHeuristics extends StateHeuristic {
     private BoardStats rootBoardStats;
 
-    public LobsterHeuristics(GameState root) {
+    public LobsterHeuristics(GameState root)
+    {
         rootBoardStats = new BoardStats(root);
     }
 
