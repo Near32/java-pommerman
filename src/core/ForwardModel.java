@@ -419,8 +419,6 @@ public class ForwardModel {
         {
             WALL_LAYER = WALL_LAYER+1;
             addWallOfFire(WALL_LAYER);
-            System.out.println(WALL_CLOCK);
-            System.out.println(WALL_LAYER);
             WALL_CLOCK = 0;
         }
 
@@ -444,7 +442,6 @@ public class ForwardModel {
 
     private void addWallOfFire(int wall_layer)
     {
-        System.out.println("Add wall of fire!");
         for (int x = 0; x < Types.BOARD_SIZE; x++)
         {
             for (int y = 0; y < BOARD_SIZE; y++)
