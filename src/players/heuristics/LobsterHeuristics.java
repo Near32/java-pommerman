@@ -194,17 +194,18 @@ public class LobsterHeuristics extends StateHeuristic {
             int diffCanKick = futureState.canKick ? 1 : 0;
             int diffBlastStrength = futureState.blastStrength - this.blastStrength;
 
-            double score = (diffEnemies / 3.0) * FACTOR_ENEMY + diffTeammates * FACTOR_TEAM + (diffWoods / maxWoods) * FACTOR_WOODS
-                    + diffCanKick * FACTOR_CANKCIK + (diffBlastStrength / maxBlastStrength) * FACTOR_BLAST;
+            double score = (diffEnemies / 3.0) * FACTOR_ENEMY + diffTeammates * FACTOR_TEAM;
+            //+ (diffWoods / maxWoods) * FACTOR_WOODS
+              //      + diffCanKick * FACTOR_CANKCIK + (diffBlastStrength / maxBlastStrength) * FACTOR_BLAST;
 
             // this gives us a step instead of a smooth function
             int maxBlockedPaths = java.lang.Math.max(this.blockedPositions, futureState.blockedPositions);
             score = score * calculateBlockedPathsMultiplier(maxBlockedPaths);
 
             // chase the powerups?
-            int numPowerUpDiff = java.lang.Math.min(futureState.numPowerUps - this.numPowerUps, 0);
-            double numPowerUpDiffMultiplier = (double)(numPowerUpDiff * -1)*0.5 + 0.5;
-            score = score * numPowerUpDiffMultiplier;
+        //    int numPowerUpDiff = java.lang.Math.min(futureState.numPowerUps - this.numPowerUps, 0);
+        //    double numPowerUpDiffMultiplier = (double)(numPowerUpDiff * -1)*0.5 + 0.5;
+        //    score = score * numPowerUpDiffMultiplier;
 
             // more bombs in prox? Use step function again
             int maxBombsInProx = java.lang.Math.max(futureState.bombsInProx, this.bombsInProx);
