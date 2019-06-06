@@ -79,7 +79,7 @@ public class LobsterPlayer extends MCTSPlayer {
         ect.setMaxTimeMillis(params.num_time);
 
         // Number of actions available
-        int num_actions = actions.length;
+        int num_actions = java.lang.Math.min(actions.length, 10);
 
         // Root of the tree
         SingleTreeNode m_root = new SingleTreeNode(params, m_rnd, num_actions, actions);
