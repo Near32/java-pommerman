@@ -1,6 +1,7 @@
 package players.mcts;
 
 import core.GameState;
+import players.Memory;
 import players.Player;
 import players.mcts.MCTSPlayer;
 import utils.ElapsedCpuTimer;
@@ -24,10 +25,21 @@ public class LobsterPlayer extends MCTSPlayer {
     /**
      * Params for this MCTS
      */
-    public MCTSParams params;
+    public LobsterParams params;
+
+    /**
+     * Agent memory for FoW version
+     */
+    private boolean enableMemory;
+    public Memory memory;
 
     public LobsterPlayer(long seed, int id) {
         this(seed, id, null);
+    }
+
+    public LobsterPlayer(long seed, int id, LobsterParams params)
+    {
+        this(seed, id, params, false);
     }
 
     /**
@@ -36,10 +48,13 @@ public class LobsterPlayer extends MCTSPlayer {
      * @param id ID of this player in the game.
      * @param params Parameters for MCTS.
      */
-    public LobsterPlayer(long seed, int id, MCTSParams params) {
+    public LobsterPlayer(long seed, int id, LobsterParams params, boolean enableMemory) {
+
         super(seed, id, params);
         reset(seed, id);
 
+        this.enableMemory = enableMemory;
+        this.memory = new Memory();
         ArrayList<Types.ACTIONS> actionsList = Types.ACTIONS.all();
         actions = new Types.ACTIONS[actionsList.size()];
         int i = 0;
@@ -59,9 +74,9 @@ public class LobsterPlayer extends MCTSPlayer {
         this.playerID = playerID;
         m_rnd = new Random(seed);
 
-        this.params = (MCTSParams) getParameters();
+        this.params = (LobsterParams) getParameters();
         if (this.params == null) {
-            this.params = new MCTSParams();
+            this.params = new LobsterParams();
         }
     }
 
@@ -78,10 +93,16 @@ public class LobsterPlayer extends MCTSPlayer {
         ect.setMaxTimeMillis(params.num_time);
 
         // Number of actions available
-        int num_actions = actions.length;
+        int num_actions = java.lang.Math.min(actions.length, 10);
+
+        // Update the memory
+        if (this.enableMemory)
+        {
+            gs = this.memory.update(gs);
+        }
 
         // Root of the tree
-        SingleTreeNode m_root = new SingleTreeNode(params, m_rnd, num_actions, actions);
+        SingleLobsterTreeNode m_root = new SingleLobsterTreeNode(params, m_rnd, num_actions, actions);
         m_root.setRootGameState(gs);
 
         //Determine the action using MCTS...
@@ -96,6 +117,6 @@ public class LobsterPlayer extends MCTSPlayer {
 
     @Override
     public Player copy() {
-        return new LobsterPlayer(seed, playerID, params);
+        return new LobsterPlayer(seed, playerID, (LobsterParams)params);
     }
 }
