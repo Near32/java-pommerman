@@ -1,6 +1,7 @@
 package players.rhea;
 
 import core.GameState;
+import players.Memory;
 import players.Player;
 import players.optimisers.ParameterizedPlayer;
 import players.rhea.utils.RHEALobsterParams;
@@ -16,6 +17,7 @@ public class RHEALobsterPlayer extends ParameterizedPlayer {
     private RollingHorizonLobsterPlayer player;
     private LobsterGameInterface gInterface;
     private RHEALobsterParams params;
+    private Memory memory;
 
     public RHEALobsterPlayer(long seed, int playerID) {
         this(seed, playerID, null);
@@ -30,6 +32,7 @@ public class RHEALobsterPlayer extends ParameterizedPlayer {
     public void reset(long seed, int playerID) {
         this.seed = seed;
         this.playerID = playerID;
+        this.memory = new Memory();
 
         // Make sure we have parameters
         this.params = (RHEALobsterParams) getParameters();
@@ -49,6 +52,7 @@ public class RHEALobsterPlayer extends ParameterizedPlayer {
 
     @Override
     public Types.ACTIONS act(GameState gs) {
+        gs = memory.update(gs);
         ElapsedCpuTimer elapsedTimer = null;
         if (params.budget_type == TIME_BUDGET) {
             elapsedTimer = new ElapsedCpuTimer();
