@@ -13,6 +13,7 @@ public class Bomb extends GameObject {
     private int blastStrength;
     private Vector2d velocity;
     private int playerIdx;
+    private int diffusion_counter = 0;
 
     public Bomb(int blastStrength, int life, int pIdx) {
         super(Types.TILETYPE.BOMB);
@@ -41,7 +42,22 @@ public class Bomb extends GameObject {
         copy.position = position.copy();
         copy.velocity = velocity.copy();
         copy.id = hashCode();
+        copy.diffusion_counter = diffusion_counter;
         return copy;
+    }
+
+    public boolean diffused()
+    {
+        return this.diffusion_counter >= BOMB_DIFFUSION_THRESHOLD;
+    }
+
+    public void increaseBombDiffusionTick()
+    {
+        this.diffusion_counter++;
+    }
+
+    public int getDiffusionCounter(){
+        return diffusion_counter;
     }
 
     public ArrayList<GameObject> explode(boolean forceExplode, Types.TILETYPE[][] board, Types.TILETYPE[][] powerups) {

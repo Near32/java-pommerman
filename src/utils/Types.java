@@ -11,7 +11,8 @@ public class Types {
 
     // Game Configuration constants.
     public static int MAX_GAME_TICKS = 800;         //Maximum duration of the game.
-    public static int BOMB_LIFE = 10;               //Ticks until a bomb explodes.
+    public static int BOMB_LIFE = 15;               //Ticks until a bomb explodes.
+    public static int BOMB_DIFFUSION_THRESHOLD = 4; //Ticks until a bomb is diffused.
     public static int FLAME_LIFE = 5;               //Ticks until a flame dissappears.
     public static int WALL_LIFE = MAX_GAME_TICKS;   //infinite wall time
     public static int WALL_SPEED = 40;              //TODO do the math to implement it depending on the board size
@@ -158,7 +159,16 @@ public class Types {
     public enum GAME_MODE {
         FFA(0),
         TEAM(1),
-        TEAM_RADIO(2);
+        TEAM_RADIO(2),
+        FFA_GETAMMO(3),
+        TEAM_GETAMMO(4),
+        TEAM_RADIO_GETAMMO(5),
+        FFA_TELEPORT(6),
+        TEAM_TELEPORT(7),
+        TEAM_RADIO_TELEPORT(8),
+        FFA_RANDOM(9),
+        TEAM_RANDOM(10),
+        TEAM_RADIO_RANDOM(11);
 
         private int key;
         GAME_MODE(int numVal) {  this.key = numVal; }
@@ -200,7 +210,7 @@ public class Types {
         ACTION_LEFT(3),
         ACTION_RIGHT(4),
         ACTION_BOMB(5),
-        ACTION_DEFUSE(6);
+        ACTION_DIFFUSE(6);
 
         private int key;
         ACTIONS(int numVal) {  this.key = numVal; }
@@ -219,7 +229,7 @@ public class Types {
             allActions.add(ACTION_LEFT);
             allActions.add(ACTION_RIGHT);
             allActions.add(ACTION_BOMB);
-            allActions.add(ACTION_DEFUSE);
+            allActions.add(ACTION_DIFFUSE);
             return allActions;
         }
 
@@ -240,6 +250,18 @@ public class Types {
             else
                 return DIRECTIONS.NONE;
         }
+    }
+
+    public enum DIFFUSION_RULE
+    {
+        GET_AMMO(0),
+        TELEPORT(1),
+        RANDOM(2);
+
+        private int key;
+
+        DIFFUSION_RULE(int numVal) {  this.key = numVal; }
+        public int getKey() {return this.key;}
     }
 
     /**

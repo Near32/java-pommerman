@@ -196,6 +196,10 @@ public class GameState {
         return model.getBombLife();
     }
 
+    public int[][] getBombDiffusionCounter() {
+        return model.getBombDiffusionCounter();
+    }
+
     public int getTeam(){ return avatar.getTeam(); }
 
     public Types.TILETYPE[] getTeammates(){ return avatar.getTeammates(); }

@@ -19,7 +19,7 @@ public class Test {
         // Game parameters
         long seed = System.currentTimeMillis();
         int boardSize = Types.BOARD_SIZE;
-        Types.GAME_MODE gameMode = Types.GAME_MODE.FFA;
+        Types.GAME_MODE gameMode = Types.GAME_MODE.FFA_TELEPORT;
         boolean useSeparateThreads = false;                 //true may be unstable, false is recommended.
 
         Game game = new Game(seed, boardSize, gameMode, "");

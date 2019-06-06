@@ -32,6 +32,20 @@ class ForwardModelTest {
             Types.ACTIONS.ACTION_UP,
     };
 
+    private static final Types.ACTIONS[] DIFFUSION_EXPERIMENT_ACTIONS = new Types.ACTIONS[]{
+            Types.ACTIONS.ACTION_BOMB,
+            Types.ACTIONS.ACTION_UP,
+            Types.ACTIONS.ACTION_DIFFUSE,
+            Types.ACTIONS.ACTION_DIFFUSE,
+            Types.ACTIONS.ACTION_DIFFUSE,
+            Types.ACTIONS.ACTION_DIFFUSE,
+            Types.ACTIONS.ACTION_DIFFUSE,
+            Types.ACTIONS.ACTION_DIFFUSE,
+            Types.ACTIONS.ACTION_DIFFUSE,
+            Types.ACTIONS.ACTION_DIFFUSE,
+            Types.ACTIONS.ACTION_DIFFUSE,
+    };
+
     private static final Types.ACTIONS[] DOUBLE_BOMB_ACTIONS = new Types.ACTIONS[]{
             Types.ACTIONS.ACTION_BOMB,
             Types.ACTIONS.ACTION_DOWN,
@@ -73,6 +87,20 @@ class ForwardModelTest {
     };
 
     private static final int[][] DEFAULT_BOARD = new int[][]{
+            new int[]{0,0,0,0,0,0,0,0,0,0,0},
+            new int[]{0,11,0,0,0,0,0,0,0,12,0},
+            new int[]{0,0,0,0,0,0,0,0,0,0,0},
+            new int[]{0,0,0,0,0,0,0,0,0,0,0},
+            new int[]{0,0,0,0,0,0,0,0,0,0,0},
+            new int[]{0,0,0,0,10,0,0,0,0,0,0},
+            new int[]{0,0,0,0,0,0,0,0,0,0,0},
+            new int[]{0,0,0,0,0,0,0,0,0,0,0},
+            new int[]{0,0,0,0,0,0,0,0,0,0,0},
+            new int[]{0,13,0,0,0,0,0,0,0,0,0},
+            new int[]{0,0,0,0,0,0,0,0,0,0,0},
+    };
+
+    private static final int[][] BOMB_DIFFUSION_BOARD = new int[][]{
             new int[]{0,0,0,0,0,0,0,0,0,0,0},
             new int[]{0,11,0,0,0,0,0,0,0,12,0},
             new int[]{0,0,0,0,0,0,0,0,0,0,0},
@@ -204,6 +232,36 @@ class ForwardModelTest {
         System.out.println(game.getGameState().toString());
         assertEquals(10, game.getGameState().getBoard()[5][4].getKey()); //Test that the avatar is still there as well
     }
+
+    /**
+     * By default a player can lay down a bomb. Test if it is placed, and the player manages to move out of the way.
+     */
+    @Test
+    void diffuseBombWorks_increaseDiffusionCounter() {
+        Game game = testNFrames(2, BOMB_DIFFUSION_BOARD, DIFFUSION_EXPERIMENT_ACTIONS, Types.GAME_MODE.FFA_GETAMMO);
+        System.out.println(game.getGameState().toString());
+
+        assertEquals(2, game.getGameState().getBombDiffusionCounter()[5][5]);
+    }
+
+    @Test
+    void diffuseBombWorks_GET_AMMO() {
+        Game game = testNFrames(7, BOMB_DIFFUSION_BOARD, DIFFUSION_EXPERIMENT_ACTIONS, Types.GAME_MODE.FFA_GETAMMO);
+        System.out.println(game.getGameState().toString());
+
+        int[][] vals = game.getGameState().getBombDiffusionCounter();
+        assertEquals(Types.TILETYPE.PASSAGE, game.getGameState().getBoard()[5][4]);
+    }
+
+    @Test
+    void diffuseBombWorks_TELEPORT() {
+        Game game = testNFrames(8, BOMB_DIFFUSION_BOARD, DIFFUSION_EXPERIMENT_ACTIONS, Types.GAME_MODE.FFA_TELEPORT);
+        System.out.println(game.getGameState().toString());
+
+        int[][] vals = game.getGameState().getBombDiffusionCounter();
+        assertEquals(Types.TILETYPE.PASSAGE, game.getGameState().getBoard()[5][4]);
+    }
+
 
     /**
      * By default a player can lay down a bomb, test if it explodes
