@@ -20,6 +20,7 @@ public class MCTSParams implements ParameterSet {
 
     public final int CUSTOM_HEURISTIC = 0;
     public final int ADVANCED_HEURISTIC = 1;
+    public final int LOBSTER_HEURISTIC = 2;
 
     public double epsilon = 1e-6;
 

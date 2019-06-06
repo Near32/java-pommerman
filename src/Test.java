@@ -1,5 +1,6 @@
 import core.Game;
 import players.*;
+import players.mcts.LobsterParams;
 import players.mcts.LobsterPlayer;
 
 import utils.Types;
@@ -42,6 +43,10 @@ public class Test {
         RHEAParams rheaParams = new RHEAParams();
         rheaParams.heurisic_type = Constants.CUSTOM_HEURISTIC;
 
+        LobsterParams lobsterParams = new LobsterParams();
+        lobsterParams.stop_type = lobsterParams.STOP_ITERATIONS;
+        lobsterParams.heuristic_method = lobsterParams.LOBSTER_HEURISTIC;
+
         /* Different available players */
 
 //        players.add(new HumanPlayer(ki1, playerID++));
@@ -50,7 +55,7 @@ public class Test {
         players.add(new DoNothingPlayer(playerID++));
         players.add(new DoNothingPlayer(playerID++));
 //        players.add(new OSLAPlayer(seed, playerID++));
-        players.add(new LobsterPlayer(seed, playerID++));
+        players.add(new LobsterPlayer(seed, playerID++, lobsterParams));
 //        players.add(new MCTSPlayer(seed, playerID++, mctsParams));
 //        players.add(new SimplePlayer(seed, playerID++));
 //        players.add(new SimpleEvoAgent(seed, playerID++));
