@@ -29,11 +29,16 @@ public class Memory {
     private Types.TILETYPE[][] memory;
     private int[][] ticksToRemember;
 
+    public Memory()
+    {
+        this(defaultMemoryDuration);
+    }
+
     public Memory(Map<Types.TILETYPE, Integer> memoryDuration)
     {
         memory = new Types.TILETYPE[Types.BOARD_SIZE][Types.BOARD_SIZE];
         ticksToRemember = new int[Types.BOARD_SIZE][Types.BOARD_SIZE];
-        this.memoryDuration = (memoryDuration != null) ? memoryDuration : defaultMemoryDuration;
+        this.memoryDuration = memoryDuration;
         for (int i = 0; i < Types.BOARD_SIZE; i++)
         {
             for (int j = 0; j < Types.BOARD_SIZE; j++)
