@@ -33,9 +33,9 @@ public class LobsterHeuristics extends StateHeuristic {
 
     public static class BoardStats
     {
-        int tick, nTeammates, nEnemies, blastStrength;
+        int tick, nTeammates, nEnemies, blastStrength, bombsInProx;
         boolean canKick;
-        int nWoods;
+        int nWoods, blockedPositions;
         static double maxWoods = -1;
         static double maxBlastStrength = 10;
 
@@ -47,7 +47,6 @@ public class LobsterHeuristics extends StateHeuristic {
         GameState gameState;
 
         BoardStats(GameState gs) {
-            gameState = gs;
             nEnemies = gs.getAliveEnemyIDs().size();
 
             // Init weights based on game mode
@@ -65,6 +64,8 @@ public class LobsterHeuristics extends StateHeuristic {
             this.tick = gs.getTick();
             this.blastStrength = gs.getBlastStrength();
             this.canKick = gs.canKick();
+            this.blockedPositions = countBlockedPositions(gs);
+            this.bombsInProx = bombsInProximity(gs);
 
             // Count the number of wood walls
             this.nWoods = 1;
@@ -79,22 +80,47 @@ public class LobsterHeuristics extends StateHeuristic {
             }
         }
 
+        int bombsInProximity(GameState gs)
+        {
+            utils.Vector2d playerPos = gs.getPosition();
+            int[][] blastStrength = gs.getBombBlastStrength();
+            int bombProx = 0;
+            for (int row=0; row < blastStrength.length; row++) {
+                for (int col = 0; col < blastStrength[row].length; col++) {
+                    int thisBombStrength = blastStrength[row][col];
+                    if (thisBombStrength > 1) {
+                        for (int r2 = row - thisBombStrength; r2 < row + thisBombStrength; r2++) {
+                            for (int c2 = col - thisBombStrength; c2 < col + thisBombStrength; c2++) {
+                                if (r2 >= 0 && r2 < blastStrength.length && c2 >= 0 && c2 < blastStrength[row].length) {
+                                    if (playerPos.x == c2 && playerPos.y == r2) {
+                                        bombProx = bombProx - 1;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return bombProx;
+        }
+
+
         boolean isBlockerTile(Types.TILETYPE type)
         {
-            if(type == Types.TILETYPE.FLAMES || type == Types.TILETYPE.RIGID || type == Types.TILETYPE.BOMB)
+            if(type == Types.TILETYPE.FLAMES || type == Types.TILETYPE.RIGID || type == Types.TILETYPE.BOMB || type == Types.TILETYPE.WOOD)
                 return true;
 
             return false;
         }
 
-        boolean isBlockerPos(BoardStats futureState)
+        int countBlockedPositions(GameState gs)
         {
-            int playerId = futureState.gameState.getPlayerId();
-            Types.TILETYPE[][] tiles = futureState.gameState.getBoard();
+            int playerId = gs.getPlayerId();
+            Types.TILETYPE[][] tiles = gs.getBoard();
 
             int xLength = tiles.length;
             int yLength = tiles[0].length;
-            Vector2d pos = gameState.getPosition();
+            Vector2d pos = gs.getPosition();
 
             int numOccupiedTiles = 0;
             if(pos.x == 0 || isBlockerTile(tiles[pos.x-1][pos.y]))
@@ -109,9 +135,20 @@ public class LobsterHeuristics extends StateHeuristic {
             if(pos.y == yLength-1 || isBlockerTile(tiles[pos.x][pos.y+1]))
                 numOccupiedTiles++;
 
-            return numOccupiedTiles >=3;
+            return numOccupiedTiles;
 
         }
+
+        double calculateBlockedPathsMultiplier(int blockedCount)
+        {
+            if(blockedCount<=1)
+                return 1.0;
+            else if(blockedCount==2)
+                return 0.5;
+            else
+                return 0.0;
+        }
+
 
         /**
          * Computes score for a game, in relation to the initial state at the root.
@@ -131,7 +168,10 @@ public class LobsterHeuristics extends StateHeuristic {
             double score = (diffEnemies / 3.0) * FACTOR_ENEMY + diffTeammates * FACTOR_TEAM + (diffWoods / maxWoods) * FACTOR_WOODS
                     + diffCanKick * FACTOR_CANKCIK + (diffBlastStrength / maxBlastStrength) * FACTOR_BLAST;
 
-            if(isBlockerPos(futureState) || isBlockerPos(this))
+            int maxBlockedPaths = java.lang.Math.max(this.blockedPositions, futureState.blockedPositions);
+            score = score * calculateBlockedPathsMultiplier(maxBlockedPaths);
+
+            if(futureState.bombsInProx<0 || this.bombsInProx<0)
                 score = 0;
 
             return score;
