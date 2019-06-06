@@ -112,9 +112,10 @@ public class LobsterHeuristics extends StateHeuristic {
             {
                 case FLAMES:
                 case RIGID:
-                case BOMB:
                 case WOOD:
                     return true;
+                case BOMB:
+                    return !canKick;
                 default:
                 {
                     Types.TILETYPE[] enemyTiles = gs.getEnemies();
