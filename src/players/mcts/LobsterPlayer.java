@@ -1,6 +1,7 @@
 package players.mcts;
 
 import core.GameState;
+import players.Memory;
 import players.Player;
 import players.mcts.MCTSPlayer;
 import utils.ElapsedCpuTimer;
@@ -25,6 +26,11 @@ public class LobsterPlayer extends MCTSPlayer {
      * Params for this MCTS
      */
     public MCTSParams params;
+
+    /**
+     * Agent memory for FoW version
+     */
+    public Memory memory;
 
     public LobsterPlayer(long seed, int id) {
         this(seed, id, null);
@@ -80,6 +86,9 @@ public class LobsterPlayer extends MCTSPlayer {
 
         // Number of actions available
         int num_actions = java.lang.Math.min(actions.length, 10);
+
+        // Update the memory
+        gs = this.memory.update(gs);
 
         // Root of the tree
         SingleTreeNode m_root = new SingleTreeNode(params, m_rnd, num_actions, actions);
