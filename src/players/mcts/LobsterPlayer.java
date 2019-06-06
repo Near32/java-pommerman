@@ -30,10 +30,16 @@ public class LobsterPlayer extends MCTSPlayer {
     /**
      * Agent memory for FoW version
      */
+    private boolean enableMemory;
     public Memory memory;
 
     public LobsterPlayer(long seed, int id) {
         this(seed, id, null);
+    }
+
+    public LobsterPlayer(long seed, int id, LobsterParams params)
+    {
+        this(seed, id, params, false);
     }
 
     /**
@@ -42,11 +48,12 @@ public class LobsterPlayer extends MCTSPlayer {
      * @param id ID of this player in the game.
      * @param params Parameters for MCTS.
      */
-    public LobsterPlayer(long seed, int id, LobsterParams params) {
+    public LobsterPlayer(long seed, int id, LobsterParams params, boolean enableMemory) {
 
         super(seed, id, params);
         reset(seed, id);
 
+        this.enableMemory = enableMemory;
         this.memory = new Memory();
         ArrayList<Types.ACTIONS> actionsList = Types.ACTIONS.all();
         actions = new Types.ACTIONS[actionsList.size()];
@@ -89,7 +96,10 @@ public class LobsterPlayer extends MCTSPlayer {
         int num_actions = java.lang.Math.min(actions.length, 10);
 
         // Update the memory
-        gs = this.memory.update(gs);
+        if (this.enableMemory)
+        {
+            gs = this.memory.update(gs);
+        }
 
         // Root of the tree
         SingleTreeNode m_root = new SingleTreeNode(params, m_rnd, num_actions, actions);
