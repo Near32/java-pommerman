@@ -87,11 +87,11 @@ public class Types {
 
         public Image getImage()
         {
-            if      (key == PASSAGE.key) return ImageIO.GetInstance().getImage("img/passage.png");
+            if      (key == PASSAGE.key) return ImageIO.GetInstance().getImage("img/CONCRETE.png");
             else if (key == RIGID.key) return ImageIO.GetInstance().getImage("img/rigid.png");
             else if (key == WOOD.key) return ImageIO.GetInstance().getImage("img/wood.png");
             else if (key == BOMB.key) return ImageIO.GetInstance().getImage("img/bomb.png");
-            else if (key == FLAMES.key) return ImageIO.GetInstance().getImage("img/flames.png");
+            else if (key == FLAMES.key) return ImageIO.GetInstance().getImage("img/BLUEflames.png");
             else if (key == FOG.key) return ImageIO.GetInstance().getImage("img/fog.png");
             else if (key == EXTRABOMB.key) return ImageIO.GetInstance().getImage("img/extrabomb.png");
             else if (key == INCRRANGE.key) return ImageIO.GetInstance().getImage("img/incrrange.png");
