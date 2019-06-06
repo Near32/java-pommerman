@@ -112,9 +112,10 @@ public class LobsterHeuristics extends StateHeuristic {
             {
                 case FLAMES:
                 case RIGID:
-                case BOMB:
                 case WOOD:
                     return true;
+                case BOMB:
+                    return !canKick;
                 default:
                 {
                     Types.TILETYPE[] enemyTiles = gs.getEnemies();
@@ -202,7 +203,8 @@ public class LobsterHeuristics extends StateHeuristic {
 
             // chase the powerups?
             int numPowerUpDiff = java.lang.Math.min(futureState.numPowerUps - this.numPowerUps, 0);
-            score = score * (double)(numPowerUpDiff * -1)*0.5 + 0.5;
+            double numPowerUpDiffMultiplier = (double)(numPowerUpDiff * -1)*0.5 + 0.5;
+            score = score * numPowerUpDiffMultiplier;
 
             // more bombs in prox? Use step function again
             int maxBombsInProx = java.lang.Math.max(futureState.bombsInProx, this.bombsInProx);
