@@ -33,7 +33,7 @@ public class LobsterHeuristics extends StateHeuristic {
 
     public static class BoardStats
     {
-        int tick, nTeammates, nEnemies, blastStrength, bombsInProx;
+        int tick, nTeammates, nEnemies, blastStrength, bombsInProx, numPowerUps;
         boolean canKick;
         int nWoods, blockedPositions;
         static double maxWoods = -1;
@@ -65,6 +65,7 @@ public class LobsterHeuristics extends StateHeuristic {
             this.canKick = gs.canKick();
             this.blockedPositions = countBlockedPositions(gs);
             this.bombsInProx = bombsInProximity(gs);
+            this.numPowerUps = calculateNumPowerUps(gs);
 
             // Count the number of wood walls
             this.nWoods = 1;
@@ -163,6 +164,18 @@ public class LobsterHeuristics extends StateHeuristic {
                 return 0.0;
         }
 
+        int calculateNumPowerUps(GameState gs)
+        {
+            Vector2d pos = gs.getPosition();
+            Types.TILETYPE[][] tiles = gs.getBoard();
+
+            Types.TILETYPE type = tiles[pos.x][pos.y];
+            if(type == Types.TILETYPE.EXTRABOMB || type == Types.TILETYPE.INCRRANGE || type == Types.TILETYPE.KICK)
+                return 1;
+
+            return 0;
+        }
+
 
         /**
          * Computes score for a game, in relation to the initial state at the root.
@@ -182,10 +195,17 @@ public class LobsterHeuristics extends StateHeuristic {
             double score = (diffEnemies / 3.0) * FACTOR_ENEMY + diffTeammates * FACTOR_TEAM + (diffWoods / maxWoods) * FACTOR_WOODS
                     + diffCanKick * FACTOR_CANKCIK + (diffBlastStrength / maxBlastStrength) * FACTOR_BLAST;
 
+            // this gives us a step instead of a smooth function
             int maxBlockedPaths = java.lang.Math.max(this.blockedPositions, futureState.blockedPositions);
             score = score * calculateBlockedPathsMultiplier(maxBlockedPaths);
 
-            if(futureState.bombsInProx<0 || this.bombsInProx<0)
+            // chase the powerups?
+            int numPowerUpDiff = java.lang.Math.min(futureState.numPowerUps - this.numPowerUps, 0);
+            score = score * (double)(numPowerUpDiff * -1)*0.5 + 0.5;
+
+            // more bombs in prox? Use step function again
+            int maxBombsInProx = java.lang.Math.max(futureState.bombsInProx, this.bombsInProx);
+            if( maxBombsInProx>0)
                 score = 0;
 
             return score;
