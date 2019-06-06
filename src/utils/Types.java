@@ -14,9 +14,9 @@ public class Types {
     public static int BOMB_LIFE = 10;               //Ticks until a bomb explodes.
     public static int FLAME_LIFE = 5;               //Ticks until a flame dissappears.
     public static int WALL_LIFE = MAX_GAME_TICKS;   //infinite wall time
-    public static int WALL_SPEED = 40;              //TODO do the math to implement it depending on the board size
-    public static int WALL_CLOCK = 0;               //internal wall clock
-    public static int DEFAULT_BOMB_BLAST = 2;       //Default bombs create flames with this range.
+    public static int WALL_SPEED = 50;              //TODO do the math to implement it depending on the board size
+    public static int WALL_CLOCK = 1;               //internal wall clock
+    public static int DEFAULT_BOMB_BLAST = 5;       //Default bombs create flames with this range.
     public static int DEFAULT_BOMB_AMMO = 1;        //Default number of simultaneous bombs an agent can put.
     public static boolean DEFAULT_BOMB_KICK = false;//Can agents kick bomb by default?
     public static int DEFAULT_VISION_RANGE = -1;    //-1 for full observability, >1 for PO.
@@ -25,12 +25,12 @@ public class Types {
     private static IGameConfig gameConfig = new OriginalGameConfig();
 
     //Board configuration constants.
-    public static int BOARD_SIZE = 18;              //Size of the board (n x n).
+    public static int BOARD_SIZE = 16;              //Size of the board (n x n).
     public static int BOARD_NUM_RIGID = 20;         //Number of rigid blocks to put in the level.
-    public static int BOARD_NUM_WOOD = 20;          //Number of wooden (destroyable) blocks for the level.
-    public static int BOARD_NUM_ITEMS = 10;         //Number of items to put in level.
+    public static int BOARD_NUM_WOOD = 10;          //Number of wooden (destroyable) blocks for the level.
+    public static int BOARD_NUM_ITEMS = 5;         //Number of items to put in level.
     public static int MAX_INACCESIBLE_TILES = 4;    //Number of inaccessible parts of the level allowed.
-    public static int CORNER_DISTANCE = 1;          //Distance to the corner, in tiles, of the starting agent position.
+    public static int CORNER_DISTANCE = 4;          //Distance to the corner, in tiles, of the starting agent position.
     public static int BREATHING_SPACE = 2;          //Breathing space, L shaped tile section free at start around agent.
 
     // Visualization variables (used to display game for humans to see).
@@ -87,11 +87,11 @@ public class Types {
 
         public Image getImage()
         {
-            if      (key == PASSAGE.key) return ImageIO.GetInstance().getImage("img/CONCRETE.png");
+            if      (key == PASSAGE.key) return ImageIO.GetInstance().getImage("img/sand.png");
             else if (key == RIGID.key) return ImageIO.GetInstance().getImage("img/rigid.png");
             else if (key == WOOD.key) return ImageIO.GetInstance().getImage("img/wood.png");
-            else if (key == BOMB.key) return ImageIO.GetInstance().getImage("img/bomb.png");
-            else if (key == FLAMES.key) return ImageIO.GetInstance().getImage("img/BLUEflames.png");
+            else if (key == BOMB.key) return ImageIO.GetInstance().getImage("img/bomb_black.png");
+            else if (key == FLAMES.key) return ImageIO.GetInstance().getImage("img/water.png");
             else if (key == FOG.key) return ImageIO.GetInstance().getImage("img/fog.png");
             else if (key == EXTRABOMB.key) return ImageIO.GetInstance().getImage("img/extrabomb.png");
             else if (key == INCRRANGE.key) return ImageIO.GetInstance().getImage("img/incrrange.png");
