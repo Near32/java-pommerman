@@ -25,7 +25,7 @@ public class LobsterPlayer extends MCTSPlayer {
     /**
      * Params for this MCTS
      */
-    public MCTSParams params;
+    public LobsterParams params;
 
     /**
      * Agent memory for FoW version
@@ -74,9 +74,9 @@ public class LobsterPlayer extends MCTSPlayer {
         this.playerID = playerID;
         m_rnd = new Random(seed);
 
-        this.params = (MCTSParams) getParameters();
+        this.params = (LobsterParams) getParameters();
         if (this.params == null) {
-            this.params = new MCTSParams();
+            this.params = new LobsterParams();
         }
     }
 
@@ -102,7 +102,7 @@ public class LobsterPlayer extends MCTSPlayer {
         }
 
         // Root of the tree
-        SingleTreeNode m_root = new SingleTreeNode(params, m_rnd, num_actions, actions);
+        SingleLobsterTreeNode m_root = new SingleLobsterTreeNode(params, m_rnd, num_actions, actions);
         m_root.setRootGameState(gs);
 
         //Determine the action using MCTS...
