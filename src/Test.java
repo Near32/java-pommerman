@@ -1,5 +1,7 @@
 import core.Game;
 import players.*;
+import players.mcts.LobsterPlayer;
+
 import utils.Types;
 import players.rhea.utils.Constants;
 import objects.Avatar;
@@ -46,7 +48,8 @@ public class Test {
 //        players.add(new HumanPlayer(ki2, playerID++));
 //        players.add(new DoNothingPlayer(playerID++));
         players.add(new OSLAPlayer(seed, playerID++));
-        players.add(new MCTSPlayer(seed, playerID++, mctsParams));
+        players.add(new LobsterPlayer(seed, playerID++, mctsParams));
+//        players.add(new MCTSPlayer(seed, playerID++, mctsParams));
         players.add(new SimplePlayer(seed, playerID++));
         players.add(new SimpleEvoAgent(seed, playerID++));
 //        players.add(new RHEAPlayer(seed, playerID++, rheaParams));
