@@ -25,8 +25,8 @@ public class SimpleEvoAgent extends Player {
     /* All the parameters that control the agent */
     public boolean flipAtLeastOneValue = true;          //If true, makes sure mutation changes at least one action.
     public double mutProb = 0.4;                        //Probability of mutating one gene in the individual
-    public int sequenceLength = 20;                     //Length of the individual.
-    public int nEvals = 120;                            //Number of evaluations to run this for.
+    public int sequenceLength = 50;                     //Length of the individual.
+    public int nEvals = 20;                            //Number of evaluations to run this for.
     public boolean useShiftBuffer = true;               //true if Shiftbuffer should be used.
     public Double discountFactor = 0.99;                //discount factor to boost actions that choose closer rewards.
 

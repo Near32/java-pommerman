@@ -285,7 +285,8 @@ public class ForwardModel {
 
             int currentLayer = Types.WALL_CLOCK / Types.WALL_SPEED;
             if(currentLayer != 0) {
-                currentLayer -= 1;
+                currentLayer -= 2;
+            }
             for (int x = 0; x < Types.BOARD_SIZE; x++) {
                 for (int y = 0; y < BOARD_SIZE; y++) {
                     if (x == currentLayer || x == (Types.BOARD_SIZE-1) - currentLayer || y == currentLayer || y == (Types.BOARD_SIZE-1) - currentLayer) {
@@ -298,7 +299,6 @@ public class ForwardModel {
                                 flame.setLife(Types.WALL_LIFE);
                             }
                         }
-                    }
                 }
             }
         }
