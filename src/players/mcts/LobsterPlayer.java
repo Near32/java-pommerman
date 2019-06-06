@@ -36,7 +36,8 @@ public class LobsterPlayer extends MCTSPlayer {
      * @param id ID of this player in the game.
      * @param params Parameters for MCTS.
      */
-    public LobsterPlayer(long seed, int id, MCTSParams params) {
+    public LobsterPlayer(long seed, int id, LobsterParams params) {
+
         super(seed, id, params);
         reset(seed, id);
 
@@ -78,7 +79,7 @@ public class LobsterPlayer extends MCTSPlayer {
         ect.setMaxTimeMillis(params.num_time);
 
         // Number of actions available
-        int num_actions = actions.length;
+        int num_actions = java.lang.Math.min(actions.length, 10);
 
         // Root of the tree
         SingleTreeNode m_root = new SingleTreeNode(params, m_rnd, num_actions, actions);
@@ -96,6 +97,6 @@ public class LobsterPlayer extends MCTSPlayer {
 
     @Override
     public Player copy() {
-        return new LobsterPlayer(seed, playerID, params);
+        return new LobsterPlayer(seed, playerID, (LobsterParams)params);
     }
 }
