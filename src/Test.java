@@ -39,7 +39,7 @@ public class Test {
         // Define some heuristics
         MCTSParams mctsParams = new MCTSParams();
         mctsParams.stop_type = mctsParams.STOP_ITERATIONS;
-        mctsParams.heuristic_method = mctsParams.ADVANCED_HEURISTIC;
+        mctsParams.heuristic_method = mctsParams.CUSTOM_HEURISTIC;
         RHEAParams rheaParams = new RHEAParams();
         rheaParams.heurisic_type = Constants.CUSTOM_HEURISTIC;
 
@@ -51,15 +51,15 @@ public class Test {
 
 //        players.add(new HumanPlayer(ki1, playerID++));
 //        players.add(new HumanPlayer(ki2, playerID++));
-        players.add(new DoNothingPlayer(playerID++));
-        players.add(new DoNothingPlayer(playerID++));
-        players.add(new DoNothingPlayer(playerID++));
+//        players.add(new DoNothingPlayer(playerID++));
+//        players.add(new DoNothingPlayer(playerID++));
+//        players.add(new DoNothingPlayer(playerID++));
 //        players.add(new OSLAPlayer(seed, playerID++));
         players.add(new LobsterPlayer(seed, playerID++, lobsterParams));
-//        players.add(new MCTSPlayer(seed, playerID++, mctsParams));
+        players.add(new MCTSPlayer(seed, playerID++, mctsParams));
 //        players.add(new SimplePlayer(seed, playerID++));
-//        players.add(new SimpleEvoAgent(seed, playerID++));
-//        players.add(new RHEAPlayer(seed, playerID++, rheaParams));
+        players.add(new SimpleEvoAgent(seed, playerID++));
+        players.add(new RHEAPlayer(seed, playerID++, rheaParams));
 
 
         // Make sure we have exactly NUM_PLAYERS players

@@ -1,7 +1,10 @@
 package players.heuristics;
 
+import core.ForwardModel;
 import core.GameState;
+import objects.GameObject;
 import utils.Types;
+import utils.Vector2d;
 
 public class LobsterHeuristics extends StateHeuristic {
     private BoardStats rootBoardStats;
@@ -41,8 +44,10 @@ public class LobsterHeuristics extends StateHeuristic {
         double FACTOR_WOODS = 0.1;
         double FACTOR_CANKCIK = 0.15;
         double FACTOR_BLAST = 0.15;
+        GameState gameState;
 
         BoardStats(GameState gs) {
+            gameState = gs;
             nEnemies = gs.getAliveEnemyIDs().size();
 
             // Init weights based on game mode
@@ -74,6 +79,40 @@ public class LobsterHeuristics extends StateHeuristic {
             }
         }
 
+        boolean isBlockerTile(Types.TILETYPE type)
+        {
+            if(type == Types.TILETYPE.FLAMES || type == Types.TILETYPE.RIGID || type == Types.TILETYPE.BOMB)
+                return true;
+
+            return false;
+        }
+
+        boolean isBlockerPos(BoardStats futureState)
+        {
+            int playerId = futureState.gameState.getPlayerId();
+            Types.TILETYPE[][] tiles = futureState.gameState.getBoard();
+
+            int xLength = tiles.length;
+            int yLength = tiles[0].length;
+            Vector2d pos = gameState.getPosition();
+
+            int numOccupiedTiles = 0;
+            if(pos.x == 0 || isBlockerTile(tiles[pos.x-1][pos.y]))
+                numOccupiedTiles++;
+
+            if(pos.y == 0 || isBlockerTile(tiles[pos.x][pos.y-1]))
+                numOccupiedTiles++;
+
+            if(pos.x == xLength-1 || isBlockerTile(tiles[pos.x+1][pos.y]))
+                numOccupiedTiles++;
+
+            if(pos.y == yLength-1 || isBlockerTile(tiles[pos.x][pos.y+1]))
+                numOccupiedTiles++;
+
+            return numOccupiedTiles >=3;
+
+        }
+
         /**
          * Computes score for a game, in relation to the initial state at the root.
          * Minimizes number of opponents in the game and number of wood walls. Maximizes blast strength and
@@ -89,8 +128,14 @@ public class LobsterHeuristics extends StateHeuristic {
             int diffCanKick = futureState.canKick ? 1 : 0;
             int diffBlastStrength = futureState.blastStrength - this.blastStrength;
 
-            return (diffEnemies / 3.0) * FACTOR_ENEMY + diffTeammates * FACTOR_TEAM + (diffWoods / maxWoods) * FACTOR_WOODS
+            double score = (diffEnemies / 3.0) * FACTOR_ENEMY + diffTeammates * FACTOR_TEAM + (diffWoods / maxWoods) * FACTOR_WOODS
                     + diffCanKick * FACTOR_CANKCIK + (diffBlastStrength / maxBlastStrength) * FACTOR_BLAST;
+
+            if(isBlockerPos(futureState) || isBlockerPos(this))
+                score = 0;
+
+            return score;
+
         }
     }
 }
