@@ -19,7 +19,7 @@ public class Test {
         // Game parameters
         long seed = System.currentTimeMillis();
         int boardSize = Types.BOARD_SIZE;
-        Types.GAME_MODE gameMode = Types.GAME_MODE.FFA_TELEPORT;
+        Types.GAME_MODE gameMode = Types.GAME_MODE.TEAM_RANDOM;
         boolean useSeparateThreads = false;                 //true may be unstable, false is recommended.
 
         Game game = new Game(seed, boardSize, gameMode, "");
@@ -48,8 +48,7 @@ public class Test {
         players.add(new SimpleEvoAgent(seed, playerID++));
         players.add(new SimpleEvoAgent(seed, playerID++));
         players.add(new SimpleEvoAgent(seed, playerID++));
-        players.add(new SimpleEvoAgent(seed, playerID++));
-//        players.add(new RHEAPlayer(seed, playerID++, rheaParams));
+        players.add(new RHEAPlayer(seed, playerID++, rheaParams));
 
 
         // Make sure we have exactly NUM_PLAYERS players

@@ -278,32 +278,6 @@ public class ForwardModel {
      */
     void next(Types.ACTIONS[] playerActions) {
 
-        // add a flame wall every WALL_SPEED ticks.
-        // If there is already a flame, the wall won't override its life.
-        if (Types.WALL_CLOCK % Types.WALL_SPEED == 0)
-        {
-
-            int currentLayer = Types.WALL_CLOCK / Types.WALL_SPEED;
-            if(currentLayer != 0) {
-                currentLayer -= 2;
-            }
-            for (int x = 0; x < Types.BOARD_SIZE; x++) {
-                for (int y = 0; y < BOARD_SIZE; y++) {
-                    if (x == currentLayer || x == (Types.BOARD_SIZE-1) - currentLayer || y == currentLayer || y == (Types.BOARD_SIZE-1) - currentLayer) {
-                        addFlame(x, y, Types.WALL_LIFE);
-                        for (GameObject flame_obj : flames)
-                        {
-                            Flame flame = (Flame)flame_obj;
-                            if(flame.getPosition().x == x && flame.getPosition().y == y)
-                            {
-                                flame.setLife(Types.WALL_LIFE);
-                            }
-                        }
-                }
-            }
-        }
-        }
-
         if (VERBOSE_FM_DEBUG && trueModel) {
             System.out.println();
         }
@@ -327,6 +301,38 @@ public class ForwardModel {
                 deadFlames.add(f);
             }
         }
+
+        // add a flame wall every WALL_SPEED ticks.
+        // If there is already a flame, the wall won't override its life.
+
+        if (Types.WALL_CLOCK % Types.WALL_SPEED == 0)
+        {
+            int currentLayer = Types.WALL_CLOCK / Types.WALL_SPEED;
+            if(currentLayer != 0)
+            {
+                currentLayer += WALL_INCREASE;
+            }
+
+            for (int x = 0; x < Types.BOARD_SIZE; x++)
+            {
+                for (int y = 0; y < BOARD_SIZE; y++)
+                {
+                    if (x == currentLayer || x == (Types.BOARD_SIZE-1) - currentLayer || y == currentLayer || y == (Types.BOARD_SIZE-1) - currentLayer)
+                    {
+                        addFlame(x, y, Types.WALL_LIFE);
+                        for (GameObject flame_obj : flames)
+                        {
+                            Flame flame = (Flame)flame_obj;
+                            if(flame.getPosition().x == x && flame.getPosition().y == y)
+                            {
+                                flame.setLife(Types.WALL_LIFE);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
 
         // 3. Agents already have desired positions set from GameState call according to their chosen actions
         // 4. Tick bombs, they set their desired position in the tick() method as well as their life. They also
