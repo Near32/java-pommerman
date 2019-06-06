@@ -248,6 +248,14 @@ public class ForwardModel {
                 for (int y = 0; y < BOARD_SIZE; y++) {
                     if (x == currentLayer || x == (Types.BOARD_SIZE-1) - currentLayer || y == currentLayer || y == (Types.BOARD_SIZE-1) - currentLayer) {
                         addFlame(x, y, Types.WALL_LIFE);
+                        for (GameObject flame_obj : flames)
+                        {
+                            Flame flame = (Flame)flame_obj;
+                            if(flame.getPosition().x == x && flame.getPosition().y == y)
+                            {
+                                flame.setLife(Types.WALL_LIFE);
+                            }
+                        }
                     }
                 }
             }
@@ -822,6 +830,7 @@ public class ForwardModel {
         flames.add(flame);
         board[y][x] = Types.TILETYPE.FLAMES;
     }
+
 
     void addPowerUp(int x, int y, Types.TILETYPE type, boolean visible) {
         Types.TILETYPE[][] targetArray;
