@@ -36,7 +36,7 @@ public class LobsterPlayer extends MCTSPlayer {
      * @param id ID of this player in the game.
      * @param params Parameters for MCTS.
      */
-    public LobsterPlayer(long seed, int id, MCTSParams params) {
+    public LobsterPlayer(long seed, int id, LobsterParams params) {
 
         super(seed, id, params);
         reset(seed, id);
@@ -97,6 +97,6 @@ public class LobsterPlayer extends MCTSPlayer {
 
     @Override
     public Player copy() {
-        return new LobsterPlayer(seed, playerID, params);
+        return new LobsterPlayer(seed, playerID, (LobsterParams)params);
     }
 }
