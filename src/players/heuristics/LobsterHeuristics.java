@@ -42,7 +42,7 @@ public class LobsterHeuristics extends StateHeuristic {
         double FACTOR_ENEMY;
         double FACTOR_TEAM;
         double FACTOR_WOODS = 0.1;
-        double FACTOR_CANKCIK = 0.15;
+        double FACTOR_CANKCIK = 0.25;
         double FACTOR_BLAST = 0.15;
 
         BoardStats(GameState gs) {
