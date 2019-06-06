@@ -1,5 +1,6 @@
 package core;
 
+import core.gameConfig.OriginalGameConfig;
 import objects.Avatar;
 import objects.Bomb;
 import objects.Flame;
@@ -234,6 +235,25 @@ public class ForwardModel {
      * @param playerActions player actions to execute in this game state.
      */
     void next(Types.ACTIONS[] playerActions) {
+
+        // add a flame wall every WALL_SPEED ticks.
+        // If there is already a flame, the wall won't override its life.
+        if (Types.WALL_CLOCK % Types.WALL_SPEED == 0)
+        {
+
+            int currentLayer = Types.WALL_CLOCK / Types.WALL_SPEED;
+            if(currentLayer != 0) {
+                currentLayer -= 1;
+            for (int x = 0; x < Types.BOARD_SIZE; x++) {
+                for (int y = 0; y < BOARD_SIZE; y++) {
+                    if (x == currentLayer || x == (Types.BOARD_SIZE-1) - currentLayer || y == currentLayer || y == (Types.BOARD_SIZE-1) - currentLayer) {
+                        addFlame(x, y, Types.WALL_LIFE);
+                    }
+                }
+            }
+        }
+        }
+
         if (VERBOSE_FM_DEBUG && trueModel) {
             System.out.println();
         }

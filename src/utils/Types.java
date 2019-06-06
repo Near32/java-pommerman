@@ -13,6 +13,9 @@ public class Types {
     public static int MAX_GAME_TICKS = 800;         //Maximum duration of the game.
     public static int BOMB_LIFE = 10;               //Ticks until a bomb explodes.
     public static int FLAME_LIFE = 5;               //Ticks until a flame dissappears.
+    public static int WALL_LIFE = MAX_GAME_TICKS;   //infinite wall time
+    public static int WALL_SPEED = 40;              //TODO do the math to implement it depending on the board size
+    public static int WALL_CLOCK = 0;               //internal wall clock
     public static int DEFAULT_BOMB_BLAST = 2;       //Default bombs create flames with this range.
     public static int DEFAULT_BOMB_AMMO = 1;        //Default number of simultaneous bombs an agent can put.
     public static boolean DEFAULT_BOMB_KICK = false;//Can agents kick bomb by default?
@@ -22,7 +25,7 @@ public class Types {
     private static IGameConfig gameConfig = new OriginalGameConfig();
 
     //Board configuration constants.
-    public static int BOARD_SIZE = 11;              //Size of the board (n x n).
+    public static int BOARD_SIZE = 18;              //Size of the board (n x n).
     public static int BOARD_NUM_RIGID = 20;         //Number of rigid blocks to put in the level.
     public static int BOARD_NUM_WOOD = 20;          //Number of wooden (destroyable) blocks for the level.
     public static int BOARD_NUM_ITEMS = 10;         //Number of items to put in level.
@@ -196,7 +199,8 @@ public class Types {
         ACTION_DOWN(2),
         ACTION_LEFT(3),
         ACTION_RIGHT(4),
-        ACTION_BOMB(5);
+        ACTION_BOMB(5),
+        ACTION_DEFUSE(6);
 
         private int key;
         ACTIONS(int numVal) {  this.key = numVal; }
@@ -215,6 +219,7 @@ public class Types {
             allActions.add(ACTION_LEFT);
             allActions.add(ACTION_RIGHT);
             allActions.add(ACTION_BOMB);
+            allActions.add(ACTION_DEFUSE);
             return allActions;
         }
 

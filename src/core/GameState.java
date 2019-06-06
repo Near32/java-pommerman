@@ -137,6 +137,7 @@ public class GameState {
         {
             model.next(actions);
             tick++;
+            Types.WALL_CLOCK = tick; //TODO here is the master wall clock
 
             if (tick == Types.MAX_GAME_TICKS)
                 Types.getGameConfig().processTimeout(gameMode, getAgents(), getAliveAgents());
