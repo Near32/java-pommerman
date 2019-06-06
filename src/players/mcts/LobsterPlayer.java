@@ -27,7 +27,7 @@ public class LobsterPlayer extends MCTSPlayer {
     public MCTSParams params;
 
     public LobsterPlayer(long seed, int id) {
-        this(seed, id, null);
+        this(seed, id);
     }
 
     /**
@@ -36,8 +36,13 @@ public class LobsterPlayer extends MCTSPlayer {
      * @param id ID of this player in the game.
      * @param params Parameters for MCTS.
      */
-    public LobsterPlayer(long seed, int id, MCTSParams params) {
-        super(seed, id, params);
+    public LobsterPlayer(long seed, int id) {
+
+        MCTSParams mctsParams = new MCTSParams();
+        mctsParams.stop_type = mctsParams.STOP_ITERATIONS;
+        mctsParams.heuristic_method = mctsParams.ADVANCED_HEURISTIC;
+
+        super(seed, id, mctsParams);
         reset(seed, id);
 
         ArrayList<Types.ACTIONS> actionsList = Types.ACTIONS.all();
