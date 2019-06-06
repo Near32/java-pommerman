@@ -59,12 +59,7 @@ public class RHEALobsterPlayer extends ParameterizedPlayer {
             elapsedTimer.setMaxTimeMillis(params.time_budget);
         }
         setup(gs, elapsedTimer);
-        Types.ACTIONS toReturn = gInterface.translate(player.getAction(elapsedTimer, Math.min(gs.nActions(), 10)));
-        if (toReturn == Types.ACTIONS.ACTION_BOMB)
-        {
-            toReturn = Types.ACTIONS.ACTION_STOP;
-        }
-        return toReturn;
+        return gInterface.translate(player.getAction(elapsedTimer, 5));
     }
 
     private void setup(GameState rootState, ElapsedCpuTimer elapsedTimer) {
