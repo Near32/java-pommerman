@@ -65,7 +65,6 @@ public class Test {
         players.add(new RHEAPlayer(seed, playerID++, rheaParams));
 
         RHEALobsterParams rheaLobsterParams = new RHEALobsterParams();
-        rheaLobsterParams.heurisic_type =rheaLobsterParams.LOBSTER_HEURISTIC;
         players.add(new RHEALobsterPlayer(seed, playerID++, rheaLobsterParams));
 
 
