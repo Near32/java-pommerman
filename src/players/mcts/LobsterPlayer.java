@@ -47,6 +47,7 @@ public class LobsterPlayer extends MCTSPlayer {
         super(seed, id, params);
         reset(seed, id);
 
+        this.memory = new Memory();
         ArrayList<Types.ACTIONS> actionsList = Types.ACTIONS.all();
         actions = new Types.ACTIONS[actionsList.size()];
         int i = 0;
