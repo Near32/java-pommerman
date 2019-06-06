@@ -8,7 +8,7 @@ import java.util.Map;
 
 public class Memory {
 
-    private static Map<Types.TILETYPE, Integer> memoryDuration = new HashMap<Types.TILETYPE, Integer>() {{
+    private static Map<Types.TILETYPE, Integer> defaultMemoryDuration = new HashMap<Types.TILETYPE, Integer>() {{
         put(Types.TILETYPE.PASSAGE, 400);
         put(Types.TILETYPE.RIGID, 400);
         put(Types.TILETYPE.WOOD, 100);
@@ -25,14 +25,15 @@ public class Memory {
 //        put(Types.TILETYPE.AGENT3, 2);
     }};
 
+    private Map<Types.TILETYPE, Integer> memoryDuration;
     private Types.TILETYPE[][] memory;
     private int[][] ticksToRemember;
 
-    public Memory()
+    public Memory(Map<Types.TILETYPE, Integer> memoryDuration)
     {
-        System.out.println("ASD");
         memory = new Types.TILETYPE[Types.BOARD_SIZE][Types.BOARD_SIZE];
         ticksToRemember = new int[Types.BOARD_SIZE][Types.BOARD_SIZE];
+        this.memoryDuration = (memoryDuration != null) ? memoryDuration : defaultMemoryDuration;
         for (int i = 0; i < Types.BOARD_SIZE; i++)
         {
             for (int j = 0; j < Types.BOARD_SIZE; j++)
@@ -40,7 +41,7 @@ public class Memory {
                 this.ticksToRemember[i][j] = 0;
                 this.memory[i][j] = Types.TILETYPE.FOG;
             }
-        };
+        }
     }
 
     public GameState update(GameState gameState) {
