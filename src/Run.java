@@ -4,6 +4,8 @@ import players.mcts.MCTSParams;
 import players.mcts.MCTSPlayer;
 import players.mcts.LobsterPlayer;
 import players.mcts.LobsterParams;
+import players.rhea.RHEALobsterPlayer;
+import players.rhea.utils.RHEALobsterParams;
 import players.rhea.RHEAPlayer;
 import players.rhea.utils.Constants;
 import players.rhea.utils.RHEAParams;
@@ -79,6 +81,7 @@ public class Run {
                 RHEAParams rheaParams = new RHEAParams();
                 MCTSParams mctsParams = new MCTSParams();
                 LobsterParams lobsterParams = new LobsterParams();
+                RHEALobsterParams RHEAlobsterParams = new RHEALobsterParams();
 
                 mctsParams.stop_type = mctsParams.STOP_ITERATIONS;
                 mctsParams.rollout_depth = 12;
@@ -124,9 +127,13 @@ public class Run {
                         break;
                      //SEND IN THE LOBSTER
                     case 8:
-                        lobsterParams.heuristic_method = lobsterParams.CUSTOM_HEURISTIC;//LobsterParams.ADVANCED_HEURISTIC;
+                        lobsterParams.heuristic_method = lobsterParams.LOBSTER_HEURISTIC;//LobsterParams.ADVANCED_HEURISTIC;
                         p = new LobsterPlayer(seed, playerID++, lobsterParams);
-                        playerStr[i-3] = "LOBSTER-ADVANCED";
+                        playerStr[i-3] = "MTCS LOBSTER";
+                        break;
+                    case 9:
+                        p = new RHEALobsterPlayer(seed, playerID++, RHEAlobsterParams);
+                        playerStr[i-3] = "RHEA LOBSTER";
                         break;
                     default:
                         System.out.println("WARNING: Invalid agent ID: " + agentType );
