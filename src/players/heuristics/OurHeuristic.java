@@ -61,7 +61,7 @@ public class OurHeuristic extends StateHeuristic {
                                         delta = 20;
                                     }
 
-                                    if(board[ip][jp] == Types.TILETYPE.AGENT0)
+                                    if(board[ip][jp].getKey() == gs.getPlayerId())
                                     {
                                         sumDelta += (1-lambdaEnemiesVSPlayer)*delta;
                                         sumDXY += Math.abs(dx - 1) + Math.abs(dy - 1);
