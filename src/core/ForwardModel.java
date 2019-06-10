@@ -75,6 +75,12 @@ public class ForwardModel {
         init_diffusion_rule(game_mode);
     }
 
+    public ForwardModel(boolean THIS_IS_FOR_TESTING_TRUE_TO_ACKNOWLEDGE) throws Exception{
+        if(!THIS_IS_FOR_TESTING_TRUE_TO_ACKNOWLEDGE){
+            throw  new Exception();
+        }
+    }
+
     private void init_diffusion_rule(Types.GAME_MODE game_mode)
     {
         if(game_mode == GAME_MODE.FFA){ this.diffusion_rule = Types.DIFFUSION_RULE.GET_AMMO;}
