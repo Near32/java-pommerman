@@ -22,6 +22,7 @@ public class Types {
     public static int DEFAULT_BOMB_AMMO = 1;        //Default number of simultaneous bombs an agent can put.
     public static boolean DEFAULT_BOMB_KICK = false;//Can agents kick bomb by default?
     public static int DEFAULT_VISION_RANGE = -1;    //-1 for full observability, >1 for PO.
+    public static int FAKE_ACTIONS = 400;           //Actions that do nothing and seize the agent
 
     //Game configuration to use in the game, which determines victory conditions.
     private static IGameConfig gameConfig = new OriginalGameConfig();
@@ -204,14 +205,14 @@ public class Types {
     /**
      * Defines all actions in the game.
      */
-    public enum ACTIONS {
-        ACTION_STOP(0),
-        ACTION_UP(1),
-        ACTION_DOWN(2),
-        ACTION_LEFT(3),
-        ACTION_RIGHT(4),
-        ACTION_BOMB(5),
-        ACTION_DIFFUSE(6);
+    public static class ACTIONS {
+        public static ACTIONS ACTION_STOP = new ACTIONS(0);
+        public static ACTIONS ACTION_UP = new ACTIONS(1);
+        public static ACTIONS ACTION_DOWN = new ACTIONS(2);
+        public static ACTIONS ACTION_LEFT = new ACTIONS(3);
+        public static ACTIONS ACTION_RIGHT = new ACTIONS(4);
+        public static ACTIONS ACTION_BOMB = new ACTIONS(5);
+        public static ACTIONS ACTION_DIFFUSE = new ACTIONS(6);
 
         private int key;
         ACTIONS(int numVal) {  this.key = numVal; }
@@ -231,6 +232,18 @@ public class Types {
             allActions.add(ACTION_RIGHT);
             allActions.add(ACTION_BOMB);
             allActions.add(ACTION_DIFFUSE);
+
+            int realActionMaxValue = 0;
+            for (ACTIONS realAction : allActions) {
+                if (realAction.getKey() > realActionMaxValue)
+                {
+                    realActionMaxValue = realAction.getKey();
+                }
+            }
+            for (int i = 0; i < FAKE_ACTIONS; i++)
+            {
+                allActions.add(new ACTIONS(i + realActionMaxValue + 1));
+            }
             return allActions;
         }
 

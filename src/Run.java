@@ -2,6 +2,10 @@ import core.Game;
 import players.*;
 import players.mcts.MCTSParams;
 import players.mcts.MCTSPlayer;
+import players.mcts.LobsterPlayer;
+import players.mcts.LobsterParams;
+import players.rhea.RHEALobsterPlayer;
+import players.rhea.utils.RHEALobsterParams;
 import players.rhea.RHEAPlayer;
 import players.rhea.utils.Constants;
 import players.rhea.utils.RHEAParams;
@@ -27,7 +31,8 @@ public class Run {
         System.out.println("\t\t 4 RHEA 200 itereations, shift buffer, pop size 1, random init, length: 12, custom heuristic");
         System.out.println("\t\t 5 RHEA 200 itereations, shift buffer, pop size 1, random init, length: 12, advanced heuristic");
         System.out.println("\t\t 6 MCTS 200 iterations, length: 12, custom heuristic");
-        System.out.println("\t\t 7 MCTS 200 iterations, length: 12, custom heuristic");
+        System.out.println("\t\t 7 MCTS 200 iterations, length: 12, advanced heuristic");
+        System.out.println("\t\t 8 LOBSTER");
     }
 
     public static void main(String[] args) {
@@ -74,11 +79,15 @@ public class Run {
                 Player p = null;
 
                 RHEAParams rheaParams = new RHEAParams();
-
                 MCTSParams mctsParams = new MCTSParams();
+                LobsterParams lobsterParams = new LobsterParams();
+                RHEALobsterParams RHEAlobsterParams = new RHEALobsterParams();
+
                 mctsParams.stop_type = mctsParams.STOP_ITERATIONS;
                 mctsParams.rollout_depth = 12;
 
+
+                //IDEA: Run -> Edit Configuration -> Programme Arugments: 0 1 -1 4 5 6 7
                 switch(agentType) {
                     case 0:
                         p = new DoNothingPlayer(playerID++);
@@ -112,9 +121,19 @@ public class Run {
                         playerStr[i-3] = "MCTS-Custom";
                         break;
                     case 7:
-                        mctsParams.heuristic_method = mctsParams.CUSTOM_HEURISTIC;//mctsParams.ADVANCED_HEURISTIC;
+                        mctsParams.heuristic_method = mctsParams.ADVANCED_HEURISTIC;//mctsParams.ADVANCED_HEURISTIC;
                         p = new MCTSPlayer(seed, playerID++, mctsParams);
                         playerStr[i-3] = "MCTS-ADVANCED";
+                        break;
+                     //SEND IN THE LOBSTER
+                    case 8:
+                        lobsterParams.heuristic_method = lobsterParams.LOBSTER_HEURISTIC;//LobsterParams.ADVANCED_HEURISTIC;
+                        p = new LobsterPlayer(seed, playerID++, lobsterParams);
+                        playerStr[i-3] = "MTCS LOBSTER";
+                        break;
+                    case 9:
+                        p = new RHEALobsterPlayer(seed, playerID++, RHEAlobsterParams);
+                        playerStr[i-3] = "RHEA LOBSTER";
                         break;
                     default:
                         System.out.println("WARNING: Invalid agent ID: " + agentType );

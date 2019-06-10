@@ -1,7 +1,6 @@
 package players.mcts;
 
 import core.GameState;
-import players.heuristics.*;
 import players.heuristics.AdvancedHeuristic;
 import players.heuristics.CustomHeuristic;
 import players.heuristics.LobsterHeuristics;
@@ -17,12 +16,12 @@ import java.util.Random;
 /**
  * This class models a node in the tree
  */
-public class SingleTreeNode
+public class SingleLobsterTreeNode
 {
     /** Main members of the tree node */
     private GameState rootState;                //Root state of the tree.
-    private SingleTreeNode parent;              //Parent of this node
-    private SingleTreeNode[] children;          //Children of this node.
+    private SingleLobsterTreeNode parent;              //Parent of this node
+    private SingleLobsterTreeNode[] children;          //Children of this node.
     private double totValue;                    //Accummulated reward obtained from this node. Divide by nVisits to obtain Q(s,a)
     private int nVisits;                        //Number of times this node has been visited.
     private int m_depth;                        //Maximum depth (number of states ahead) reached on each iteration.
@@ -35,7 +34,7 @@ public class SingleTreeNode
 
     //Running bounds: keep track of the highest and lowest rewards ever seen in the game. Used for normalizing Q(s,a)
     private double[] bounds = new double[]{Double.MAX_VALUE, -Double.MAX_VALUE};
-    public MCTSParams params;                   //Parameters set for MCTS
+    public LobsterParams params;                   //Parameters set for MCTS
 
     private int childIdx;                       //Index of this child in the parent's array of children
     private int fmCallsCount;                   //Keeps a count on the number of usages of the forward model (used for termination condition)
@@ -45,20 +44,20 @@ public class SingleTreeNode
 
 
     //Constructor of the MCTS node class.
-    SingleTreeNode(MCTSParams p, Random rnd, int num_actions, Types.ACTIONS[] actions) {
+    SingleLobsterTreeNode(LobsterParams p, Random rnd, int num_actions, Types.ACTIONS[] actions) {
         this(p, null, -1, rnd, num_actions, actions, 0, null);
     }
 
     //Constructor of the MCTS node class.
-    private SingleTreeNode(MCTSParams p, SingleTreeNode parent, int childIdx, Random rnd, int num_actions,
-                           Types.ACTIONS[] actions, int fmCallsCount, StateHeuristic sh) {
+    private SingleLobsterTreeNode(LobsterParams p, SingleLobsterTreeNode parent, int childIdx, Random rnd, int num_actions,
+                                  Types.ACTIONS[] actions, int fmCallsCount, StateHeuristic sh) {
         this.params = p;
         this.fmCallsCount = fmCallsCount;
         this.parent = parent;
         this.m_rnd = rnd;
         this.num_actions = num_actions;
         this.actions = actions;
-        children = new SingleTreeNode[num_actions];
+        children = new SingleLobsterTreeNode[num_actions];
         totValue = 0.0;
         this.childIdx = childIdx;
         if(parent != null) {
@@ -79,10 +78,10 @@ public class SingleTreeNode
         this.rootState = gs;
         if (params.heuristic_method == params.CUSTOM_HEURISTIC)
             this.rootStateHeuristic = new CustomHeuristic(gs);
-        else if (params.heuristic_method == params.OUR_HEURISTIC) // New method: combined heuristics
-            this.rootStateHeuristic = new OurHeuristic();
         else if (params.heuristic_method == params.ADVANCED_HEURISTIC) // New method: combined heuristics
             this.rootStateHeuristic = new AdvancedHeuristic(gs, m_rnd);
+        else if (params.heuristic_method == params.LOBSTER_HEURISTIC) // our method: lobster heuristic
+            this.rootStateHeuristic = new LobsterHeuristics(gs);
     }
 
 
@@ -107,7 +106,7 @@ public class SingleTreeNode
             GameState state = rootState.copy();
 
             //1. Selection and 2. Expansion are executed in treePolicy(state)
-            SingleTreeNode selected = treePolicy(state);
+            SingleLobsterTreeNode selected = treePolicy(state);
             //3. Simulation - rollout
             double delta = selected.rollOut(state);
             //4. Back-propagation
@@ -136,10 +135,10 @@ public class SingleTreeNode
      * @param state Current state to do the policy from.
      * @return the expanded node.
      */
-    private SingleTreeNode treePolicy(GameState state) {
+    private SingleLobsterTreeNode treePolicy(GameState state) {
 
         //'cur': our current node in the tree.
-        SingleTreeNode cur = this;
+        SingleLobsterTreeNode cur = this;
 
         //We keep going down the tree as long as the game is not over and we haven't reached the maximum depth
         while (!state.isTerminal() && cur.m_depth < params.rollout_depth)
@@ -164,7 +163,7 @@ public class SingleTreeNode
      * @return true if the node is not fully expanded.
      */
     private boolean notFullyExpanded() {
-        for (SingleTreeNode tn : children) {
+        for (SingleLobsterTreeNode tn : children) {
             if (tn == null) {
                 return true;
             }
@@ -178,7 +177,7 @@ public class SingleTreeNode
      * @param state Game state *before* the expansion happens (i.e. parent node that is not fully expanded).
      * @return The newly expande tree node.
      */
-    private SingleTreeNode expand(GameState state) {
+    private SingleLobsterTreeNode expand(GameState state) {
 
         //Go through all the not-expanded children of this node and pick one at random.
         int bestAction = 0;
@@ -196,7 +195,7 @@ public class SingleTreeNode
 
         //state is now the next state, of the expanded node. Create a node with such state
         // and add it to the tree, as child of 'this'
-        SingleTreeNode tn = new SingleTreeNode(params,this,bestAction,this.m_rnd,num_actions,
+        SingleLobsterTreeNode tn = new SingleLobsterTreeNode(params,this,bestAction,this.m_rnd,num_actions,
                 actions, fmCallsCount, rootStateHeuristic);
         children[bestAction] = tn;
 
@@ -245,12 +244,12 @@ public class SingleTreeNode
      * @param state
      * @return
      */
-    private SingleTreeNode uct(GameState state) {
+    private SingleLobsterTreeNode uct(GameState state) {
 
         //We'll pick the action with the highest UCB1 value.
-        SingleTreeNode selected = null;
+        SingleLobsterTreeNode selected = null;
         double bestValue = -Double.MAX_VALUE;
-        for (SingleTreeNode child : this.children)
+        for (SingleLobsterTreeNode child : this.children)
         {
             //For each chindren, calculate the different parts. First, exploitation:
             double hvVal = child.totValue;
@@ -369,9 +368,9 @@ public class SingleTreeNode
      * @param node Node to start backup from. This node should be the one expanded in this iteration.
      * @param result Reward to back-propagate
      */
-    private void backUp(SingleTreeNode node, double result)
+    private void backUp(SingleLobsterTreeNode node, double result)
     {
-        SingleTreeNode n = node;
+        SingleLobsterTreeNode n = node;
 
         //Go up until n == null, which happens after updating the root.
         while(n != null)
