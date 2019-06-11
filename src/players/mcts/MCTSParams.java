@@ -33,9 +33,9 @@ public class MCTSParams implements ParameterSet {
 
     public boolean collapsing = false;        // Whether we use Vanilla/Collapsing-MCTS.
     public Function<GameState, List<Float>> ClusteringHeuristicFunction = null;
-    public final int nbrUpdates2Uniform = 100;
-    public final float maxClusterRatio = 0.25f;
-    public final int nbrClustererCycles = 4;
+    public int nbrUpdates2Uniform = 100;
+    public float maxClusterRatio = 0.25f;
+    public int nbrClustererCycles = 4;
 
     // Parameters
     public double K = Math.sqrt(2);

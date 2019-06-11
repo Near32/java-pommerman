@@ -53,15 +53,18 @@ public class Test {
         OurMCTSParams.K = 10;//Math.sqrt(2);
         OurMCTSParams.rollout_depth = 6;
         OurMCTSParams.stop_type = mctsParams.STOP_ITERATIONS;
-        OurMCTSParams.heuristic_method = mctsParams.CUSTOM_HEURISTIC;
+        OurMCTSParams.heuristic_method = mctsParams.OUR_HEURISTIC;
 
 
         MCTSParams CollapseMCTSParams = new MCTSParams();
         CollapseMCTSParams.K = 10;//Math.sqrt(2);
         CollapseMCTSParams.rollout_depth = 6;
         CollapseMCTSParams.stop_type = mctsParams.STOP_ITERATIONS;
-        CollapseMCTSParams.heuristic_method = mctsParams.CUSTOM_HEURISTIC;
+        CollapseMCTSParams.heuristic_method = mctsParams.OUR_HEURISTIC;
         CollapseMCTSParams.collapsing = true;
+        CollapseMCTSParams.nbrUpdates2Uniform = 100;
+        CollapseMCTSParams.maxClusterRatio = 0.25f;
+        CollapseMCTSParams.nbrClustererCycles = 100;
         List<Integer> lch = new ArrayList<Integer>();
         lch.add(0);
         lch.add(1);
