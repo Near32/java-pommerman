@@ -8,10 +8,7 @@ import players.heuristics.StateHeuristic;
 import utils.*;
 import utils.Clustering.ClusteringResult;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Random;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -56,18 +53,18 @@ public class SingleTreeNode
     //Constructor of the MCTS node class.
     SingleTreeNode(MCTSParams p, Random rnd, int num_actions, Types.ACTIONS[] actions,
                    ProbabilitySampler<Integer> actionSampler) {
-        this(p, null, -1, rnd, num_actions, actions, 0, null);
+        this(p, null, -1, rnd, num_actions, actions, 0, null, actionSampler);
     }
 
     //Constructor of the MCTS node class.
     SingleTreeNode(GameState currentState, MCTSParams p, Random rnd, int num_actions, Types.ACTIONS[] actions,
                    ProbabilitySampler<Integer> actionSampler) {
-        this(currentState, p, null, -1, rnd, num_actions, actions, 0, null);
+        this(currentState, p, null, -1, rnd, num_actions, actions, 0, null, actionSampler);
     }
 
     //Constructor of the MCTS node class.
     private SingleTreeNode(MCTSParams p, SingleTreeNode parent, int childIdx, Random rnd, int num_actions,
-                           Types.ACTIONS[] actions, int fmCallsCount, StateHeuristic sh) {
+                           Types.ACTIONS[] actions, int fmCallsCount, StateHeuristic sh, ProbabilitySampler<Integer> actionSampler) {
         this.params = p;
         this.fmCallsCount = fmCallsCount;
         this.parent = parent;
@@ -86,12 +83,13 @@ public class SingleTreeNode
         else
             m_depth = 0;
         this.clusterer = new KMeansStateClusterer( (int)(this.params.maxClusterRatio*this.num_actions), this.params.nbrClustererCycles );
+        this.actionSampler = actionSampler;
     }
 
     //Constructor of the MCTS node class.
     private SingleTreeNode(GameState currentState, MCTSParams p, SingleTreeNode parent, int childIdx, Random rnd, int num_actions,
-                           Types.ACTIONS[] actions, int fmCallsCount, StateHeuristic sh) {
-        this(p, parent, childIdx, rnd, num_actions, actions, fmCallsCount, sh);
+                           Types.ACTIONS[] actions, int fmCallsCount, StateHeuristic sh, ProbabilitySampler<Integer> actionSampler) {
+        this(p, parent, childIdx, rnd, num_actions, actions, fmCallsCount, sh, actionSampler);
 
         this.nodeState = currentState;
     }
@@ -304,7 +302,7 @@ public class SingleTreeNode
         //state is now the next state, of the expanded node. Create a node with such state
         // and add it to the tree, as child of 'this'
         SingleTreeNode tn = new SingleTreeNode(params,this,bestAction,this.m_rnd,num_actions,
-                actions, fmCallsCount, rootStateHeuristic);
+                actions, fmCallsCount, rootStateHeuristic, null);
         children[bestAction] = tn;
 
         //Get the expanded node back.
@@ -328,7 +326,7 @@ public class SingleTreeNode
             //gsi is now the next state, of the expanded node. Create a node with such state
             // and add it to the tree, as child of 'this'
             SingleTreeNode tn = new SingleTreeNode(gsi, params,this,i,this.m_rnd,num_actions,
-                    actions, fmCallsCount, rootStateHeuristic);
+                    actions, fmCallsCount, rootStateHeuristic, actionSampler);
             children[i] = tn;
         }
         return children;
@@ -537,6 +535,14 @@ public class SingleTreeNode
     {
         Types.TILETYPE[][] board = state.getBoard();
         ArrayList<Types.ACTIONS> actionsToTry = Types.ACTIONS.all();
+        Map<Integer,Boolean> mask = null;
+        if(this.params.collapsing) {
+            mask = new HashMap<Integer, Boolean>(actionsToTry.size());
+            for (Types.ACTIONS action : actionsToTry) {
+                int act_idx = action.getKey();
+                mask.put(act_idx, true);
+            }
+        }
         int width = board.length;
         int height = board[0].length;
 
@@ -544,7 +550,13 @@ public class SingleTreeNode
         while(actionsToTry.size() > 0) {
 
             //See where would this take me.
-            int nAction = m_rnd.nextInt(actionsToTry.size());
+            int nAction;
+            if(this.params.collapsing) {
+                nAction = actionSampler.sample(mask);
+            }
+            else{
+                nAction = m_rnd.nextInt(actionsToTry.size());
+            }
             Types.ACTIONS act = actionsToTry.get(nAction);
             Vector2d dir = act.getDirection().toVec();
 
@@ -558,6 +570,7 @@ public class SingleTreeNode
                     return nAction;
 
             actionsToTry.remove(nAction);
+            if(this.params.collapsing) { mask.replace(nAction, false); }
         }
 
         //If we got here, we couldn't find an action that wouldn't kill me. We can take any, really.

@@ -24,6 +24,7 @@ public class MCTSParams implements ParameterSet {
 
     public double epsilon = 1e-6;
 
+    public final boolean collapsing = false;        // Whether we use Vanilla/Collapsing-MCTS.
     public final float maxClusterRatio = 0.25f;
     public final int nbrClustererCycles = 4;
 
