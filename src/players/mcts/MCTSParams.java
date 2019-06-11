@@ -24,6 +24,9 @@ public class MCTSParams implements ParameterSet {
 
     public double epsilon = 1e-6;
 
+    public final float maxClusterRatio = 0.25f;
+    public final int nbrClustererCycles = 4;
+
     // Parameters
     public double K = Math.sqrt(2);
     public int rollout_depth = 8;//10;

@@ -1,4 +1,4 @@
-package utils;
+package utils.Clustering;
 
 import core.ForwardModel;
 import org.christopherfrantz.dbscan.DBSCANClusterer;
@@ -11,8 +11,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static utils.KMeansStateClusterer.findVectorDistance;
-import static utils.KMeansStateClusterer.normaliseVecors;
+import static utils.Clustering.KMeansStateClusterer.findVectorDistance;
+import static utils.Clustering.KMeansStateClusterer.normaliseVecors;
 
 public class DBScannClusterer {
   private final int maxElements;
