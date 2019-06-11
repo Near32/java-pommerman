@@ -1,6 +1,7 @@
 import core.Game;
 import core.GameState;
 import players.*;
+import players.heuristics.*;
 import players.mcts.LobsterParams;
 import players.mcts.LobsterPlayer;
 
@@ -61,12 +62,14 @@ public class Test {
         CollapseMCTSParams.stop_type = mctsParams.STOP_ITERATIONS;
         CollapseMCTSParams.heuristic_method = mctsParams.OUR_HEURISTIC;
         CollapseMCTSParams.collapsing = true;
+        List<StateHeuristic> lch = new ArrayList<>();
+        //lch.add( new PlayerCountHeuristic() );
+        lch.add( new OurHeuristic() );
         CollapseMCTSParams.ClusteringHeuristicFunction = gs->
         {
             List<Float> ret = new ArrayList<>();
-            Random rnd = new Random();
-            for(int i=0;i<=3;i++)
-                ret.add( rnd.nextFloat() );
+            for(StateHeuristic sh: lch)
+                ret.add( (float) sh.evaluateState(gs));
             return ret;
         };
 

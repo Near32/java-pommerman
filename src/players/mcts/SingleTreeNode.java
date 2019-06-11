@@ -107,6 +107,8 @@ public class SingleTreeNode
     void setRootGameState(GameState gs)
     {
         this.rootState = gs;
+        if(this.parent == null)
+            this.nodeState = gs.copy();
         if (params.heuristic_method == params.CUSTOM_HEURISTIC)
             this.rootStateHeuristic = new CustomHeuristic(gs);
         else if (params.heuristic_method == params.OUR_HEURISTIC) // New method: combined heuristics
