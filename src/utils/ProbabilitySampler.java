@@ -12,23 +12,14 @@ public class ProbabilitySampler<T> {
     private Map<T, Float> weightUniformer;  // geometric ratios that transforms the distribution into a uniform one in (exactly) nbrUpdates2Uniform updates.
     ///
 
+    // TODO: Hmm, what happens if we have negative weights put in at any point?
+    //  eg an action has a negative novelty? (don't even know if that's possible). Might have to clamp weights to 0
     public ProbabilitySampler(Random random, Map<T, Float> weights, int nbrUpdates2Uniform)
     {
         this.random = random;
         this.weights = new HashMap<>();
         // Transform the weights to make sure that they fit a density probability distribution:
-        Float sumexpw = 0f;
-        for(T key: weights.keySet())
-        {
-            Float expw = (float)Math.exp(weights.get(key));
-            sumexpw += expw;
-            this.weights.put( key, expw);
-        }
-        for(T key: this.weights.keySet())
-        {
-            Float normalized_expw = this.weights.get(key)/sumexpw;
-            this.weights.replace( key, normalized_expw);
-        }
+        updateWeights(weights);
 
         if(nbrUpdates2Uniform <= 0)
         {
@@ -72,10 +63,10 @@ public class ProbabilitySampler<T> {
         return ret;
     }
 
+    /** Transform the weights to make sure that they fit a density probability distribution: */
     public void updateWeights(Map<T,Float> weights)
     {
         this.weights.clear();
-        // Transform the weights to make sure that they fit a density probability distribution:
         Float sumexpw = 0f;
         for(T key: weights.keySet())
         {
