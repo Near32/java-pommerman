@@ -1,5 +1,6 @@
 package players.mcts;
 
+import com.sun.xml.internal.bind.v2.runtime.unmarshaller.XsiNilLoader;
 import core.GameState;
 import players.heuristics.*;
 import players.heuristics.AdvancedHeuristic;
@@ -75,7 +76,7 @@ public class SingleTreeNode
         this.num_actions = num_actions;
         this.actions = actions;
         children = new SingleTreeNode[num_actions];
-        this.representativeChildren = new ArrayList<>();
+        this.representativeChildren = null;
         children2ClusterIdx = new int[num_actions];
         totValue = 0.0;
         this.childIdx = childIdx;
@@ -651,6 +652,26 @@ public class SingleTreeNode
                 n.bounds[1] = result;
             }
 
+            if(this.params.collapsing)
+            {
+                // If the representativeChildren of node n are initialized,
+                // then we can update all the nodes' statistics to the statistics
+                // of the representative node of the cluster they belong to:
+                if(n.representativeChildren != null)
+                {
+                    for(int idxCluster=0;idxCluster<n.representativeChildren.size();idxCluster++)
+                    {
+                        SingleTreeNode repr = n.representativeChildren.get(idxCluster);
+                        List<ClusteringResult> lcr = n.clusters.get(idxCluster);
+                        for(int idxNodeInCluster=0;idxNodeInCluster<lcr.size();idxNodeInCluster++)
+                        {
+                            int idxChildNode = lcr.get(idxNodeInCluster).getNodeIdx();
+                            n.children[idxChildNode].totValue = repr.totValue;
+                            n.children[idxChildNode].nVisits= repr.nVisits;
+                        }
+                    }
+                }
+            }
             //Next one, the parent.
             n = n.parent;
         }

@@ -29,7 +29,7 @@ public class Test {
         // Game parameters
         long seed = System.currentTimeMillis();
         int boardSize = Types.BOARD_SIZE;
-        Types.GAME_MODE gameMode = Types.GAME_MODE.FFA_TELEPORT;
+        Types.GAME_MODE gameMode = Types.GAME_MODE.FFA;
         boolean useSeparateThreads = false;                 //true may be unstable, false is recommended.
 
         Game game = new Game(seed, boardSize, gameMode, "");
@@ -86,10 +86,12 @@ public class Test {
 //        players.add(new HumanPlayer(ki2, playerID++));
 //        players.add(new DoNothingPlayer(playerID++));
 */
-        players.add(new MCTSPlayer(seed, playerID++, OurMCTSParams));
         players.add(new MCTSPlayer(seed, playerID++, CollapseMCTSParams));
+        players.add(new MCTSPlayer(seed, playerID++, OurMCTSParams));
         players.add(new SimpleEvoAgent(seed, playerID++));
         players.add(new RHEAPlayer(seed, playerID++, rheaParams));
+        //players.add(new MCTSPlayer(seed, playerID++, OurMCTSParams));
+        //players.add(new MCTSPlayer(seed, playerID++, OurMCTSParams));
 
 /*
 //        players.add(new DoNothingPlayer(playerID++));
