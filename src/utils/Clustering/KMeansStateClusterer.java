@@ -18,12 +18,12 @@ public class KMeansStateClusterer {
 
   public static void main(String[] args) throws Exception {
     KMeansStateClusterer clusterer = new KMeansStateClusterer(2,4);
-    GameState[] gss = new GameState[6];
+    List<GameState> gss = new ArrayList<GameState>();
     long seed = 1;
     int size = 11;
     Types.GAME_MODE gameMode = Types.GAME_MODE.FFA;
-    for(int i = 0; i < gss.length; i++) {
-      gss[i] = new GameState(seed,size,gameMode);
+    for(int i = 0; i < 6; i++) {
+      gss.add(new GameState(seed,size,gameMode));
     }
 
     List<List<ClusteringResult>> clusters = clusterer.generateClusters(gss, gs->{
@@ -63,8 +63,8 @@ public class KMeansStateClusterer {
   }
 
   //TODO : new class to contain the list of list of map of idx of children and heuristic score associated.
-  public List<List<ClusteringResult>> generateClusters(GameState[] gamestates, Function<GameState, List<Float>> heuristicFunction) {
-    List<List<Float>> heuristicVectors = Arrays.stream(gamestates).map(heuristicFunction).collect(Collectors.toList());
+  public List<List<ClusteringResult>> generateClusters(List<GameState> gamestates, Function<GameState, List<Float>> heuristicFunction) {
+    List<List<Float>> heuristicVectors = gamestates.stream().map(heuristicFunction).collect(Collectors.toList());
 
     int vectorLength = heuristicVectors.get(0).size();
 

@@ -356,31 +356,33 @@ public class SingleTreeNode
         List<GameState> gss = Arrays.stream(expandedChildren).map(child->child.nodeState).collect(Collectors.toList());
 
         // Initialization of the clusters for this SingleTreeNode:
-        this.clusters = clusterer.generateClusters((GameState[]) gss.toArray(), ClusteringHeuristicFunction);
+        this.clusters = clusterer.generateClusters(gss, ClusteringHeuristicFunction);
 
         int nbrCluster = clusters.size();
-        this.representativeChildren = new ArrayList<>(nbrCluster);
+        this.representativeChildren = new ArrayList<>();
         int countCluster = 0;
         // Initialise the array telling which cluster each child belongs to
         children2ClusterIdx = new int[children.length];
         for(int idxCluster = 0; idxCluster < clusters.size(); idxCluster++)
         {
             List<ClusteringResult> cluster = clusters.get(idxCluster);
-            List<Float> norms = new ArrayList<Float>(cluster.size());
-            for (int i=0; i<cluster.size(); i++)
+            if(cluster.size() > 0)
             {
-                // Get the absolute index of the child that's in the cluster, and set it in children2ClusterIdx
-                children2ClusterIdx[cluster.get(i).getNodeIdx()] = idxCluster;
-                norms.set(i, euclidianNorm(cluster.get(i).getHeuristicScores()));
+                List<Float> norms = new ArrayList<Float>();
+                for (int i = 0; i < cluster.size(); i++) {
+                    // Get the absolute index of the child that's in the cluster, and set it in children2ClusterIdx
+                    children2ClusterIdx[cluster.get(i).getNodeIdx()] = idxCluster;
+                    norms.add(euclidianNorm(cluster.get(i).getHeuristicScores()));
+                }
+                // Find the greatest:
+                int idxReprInCluster = maxIndexInVector(norms);
+                // Make the representative child of the cluster be the node
+                // that scores the highest in terms of the chosen norm over
+                // the heuristic vector:
+                int idxReprInChildren = cluster.get(idxReprInCluster).getNodeIdx();
+                SingleTreeNode repr = this.children[idxReprInChildren];
+                this.representativeChildren.add(repr);
             }
-            // Find the greatest:
-            int idxReprInCluster = maxIndexInVector(norms);
-            // Make the representative child of the cluster be the node
-            // that scores the highest in terms of the chosen norm over
-            // the heuristic vector:
-            int idxReprInChildren = cluster.get(idxReprInCluster).getNodeIdx();
-            SingleTreeNode repr = this.children[idxReprInChildren];
-            this.representativeChildren.set(countCluster++, repr);
         }
     }
 
