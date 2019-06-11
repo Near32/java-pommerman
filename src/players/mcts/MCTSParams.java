@@ -1,16 +1,23 @@
 package players.mcts;
 
+import core.GameState;
+import players.heuristics.StateHeuristic;
+import players.heuristics.CustomHeuristic;
 import javafx.util.Pair;
 import players.optimisers.ParameterSet;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 @SuppressWarnings("WeakerAccess")
 public class MCTSParams implements ParameterSet {
 
     // Constants
+    public final boolean reuse_tree = false;    // Whether we re-use the tree from one tick to another.
+
     public final double HUGE_NEGATIVE = -1000;
     public final double HUGE_POSITIVE =  1000;
 
@@ -24,7 +31,9 @@ public class MCTSParams implements ParameterSet {
 
     public double epsilon = 1e-6;
 
-    public final boolean collapsing = false;        // Whether we use Vanilla/Collapsing-MCTS.
+    public boolean collapsing = false;        // Whether we use Vanilla/Collapsing-MCTS.
+    public Function<GameState, List<Float>> ClusteringHeuristicFunction = null;
+    public final int nbrUpdates2Uniform = 100;
     public final float maxClusterRatio = 0.25f;
     public final int nbrClustererCycles = 4;
 

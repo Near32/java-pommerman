@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static utils.Clustering.KMeansStateClusterer.findVectorDistance;
-import static utils.Clustering.KMeansStateClusterer.normaliseVecors;
+import static utils.Clustering.KMeansStateClusterer.normaliseVectors;
 
 public class DBScannClusterer {
   private final int maxElements;
@@ -46,7 +46,7 @@ public class DBScannClusterer {
     List<Float> min = new ArrayList<>();
     List<Float> max = new ArrayList<>();
 
-    normaliseVecors(heuristicVectors, vectorLength, min, max);
+    normaliseVectors(heuristicVectors, vectorLength, min, max);
 
     List<VectorContainer> containedVectors = IntStream.range(0, gamestates.length).mapToObj(idx-> new VectorContainer(idx,heuristicVectors.get(idx))).collect(Collectors.toList());
 

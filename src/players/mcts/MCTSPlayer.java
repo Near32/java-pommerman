@@ -5,8 +5,11 @@ import players.optimisers.ParameterizedPlayer;
 import players.Player;
 import utils.ElapsedCpuTimer;
 import utils.Types;
+import utils.ProbabilitySampler;
 
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.Random;
 
 public class MCTSPlayer extends ParameterizedPlayer {
@@ -25,6 +28,13 @@ public class MCTSPlayer extends ParameterizedPlayer {
      * Params for this MCTS
      */
     public MCTSParams params;
+
+    /**
+     * Previous root that may be re-used at the next tick.
+     */
+    private SingleTreeNode previous_root = null;
+
+    public ProbabilitySampler<Integer> tree_action_sampler;
 
     public MCTSPlayer(long seed, int id) {
         this(seed, id, null);
@@ -45,6 +55,14 @@ public class MCTSPlayer extends ParameterizedPlayer {
         int i = 0;
         for (Types.ACTIONS act : actionsList) {
             actions[i++] = act;
+        }
+
+        if(this.params.collapsing)
+        {
+            // Reset the action sampling distribution to a uniform one.
+            Map<Integer, Float> weights = new HashMap<Integer,Float>(actions.length);
+            for(int ai=0;ai<=actions.length;ai++)  {   weights.put(ai, 1.0f);    }
+            this.tree_action_sampler = new ProbabilitySampler<Integer>(weights,this.params.nbrUpdates2Uniform);
         }
     }
 
@@ -81,14 +99,28 @@ public class MCTSPlayer extends ParameterizedPlayer {
         int num_actions = actions.length;
 
         // Root of the tree
-        SingleTreeNode m_root = new SingleTreeNode(params, m_rnd, num_actions, actions);
+        SingleTreeNode m_root;
+        if(this.params.reuse_tree && this.previous_root != null){
+            m_root = this.previous_root.getChild(this.previous_root.mostVisitedAction());
+        }
+        else {
+            m_root = new SingleTreeNode(params, m_rnd, num_actions, actions, tree_action_sampler);
+        }
         m_root.setRootGameState(gs);
 
         //Determine the action using MCTS...
-        m_root.mctsSearch(ect);
+        if(this.params.collapsing)
+            m_root.collapseMctsSearch(ect);
+        else
+            m_root.mctsSearch(ect);
 
         //Determine the best action to take and return it.
         int action = m_root.mostVisitedAction();
+
+        // Make sure that we will re-use the tree at the next iteration:
+        if(this.params.reuse_tree){
+            this.previous_root = m_root;
+        }
 
         //... and return it.
         return actions[action];

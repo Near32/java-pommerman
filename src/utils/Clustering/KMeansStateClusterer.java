@@ -71,7 +71,7 @@ public class KMeansStateClusterer {
     List<Float> min = new ArrayList<>();
     List<Float> max = new ArrayList<>();
 
-    normaliseVecors(heuristicVectors, vectorLength, min, max);
+    normaliseVectors(heuristicVectors, vectorLength, min, max);
 
 
     //Initialise the means
@@ -157,7 +157,7 @@ public class KMeansStateClusterer {
     return result;
   }
 
-  private static float findVectorDistance(List<Float> vector1, List<Float> vector2) {
+  public static float findVectorDistance(List<Float> vector1, List<Float> vector2) {
     float dist = 0;
     for (int i = 0; i < vector1.size(); i++) {
       float diff = (vector1.get(i) - vector2.get(i));
@@ -166,7 +166,7 @@ public class KMeansStateClusterer {
     return (float) Math.sqrt(dist);
   }
 
-  private static void normaliseVecors(List<List<Float>> heuristicVectors, int vectorLength, List<Float> min, List<Float> max) {
+  public static void normaliseVectors(List<List<Float>> heuristicVectors, int vectorLength, List<Float> min, List<Float> max) {
     for (int i = 0; i < vectorLength; i++) {
       float minVal = Integer.MAX_VALUE;
       float maxVal = Integer.MIN_VALUE;

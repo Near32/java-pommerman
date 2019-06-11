@@ -72,6 +72,24 @@ public class ProbabilitySampler<T> {
         return ret;
     }
 
+    public void updateWeights(Map<T,Float> weights)
+    {
+        this.weights.clear();
+        // Transform the weights to make sure that they fit a density probability distribution:
+        Float sumexpw = 0f;
+        for(T key: weights.keySet())
+        {
+            Float expw = (float)Math.exp(weights.get(key));
+            sumexpw += expw;
+            this.weights.put( key, expw);
+        }
+        for(T key: this.weights.keySet())
+        {
+            Float normalized_expw = this.weights.get(key)/sumexpw;
+            this.weights.replace( key, normalized_expw);
+        }
+    }
+
     /**
      * Updates the distribution towards the Uniform distribution.
      * @returns boolean specifying whether the distribution is uniform already or not.

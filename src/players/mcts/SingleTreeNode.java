@@ -33,8 +33,10 @@ public class SingleTreeNode
     private Types.ACTIONS[] actions;            //Array with all actions available
     private StateHeuristic rootStateHeuristic;  //Heuristic to evaluate game states at the end of rollouts.
 
-    static private KMeansStateClusterer clusterer;     //Clusterer
-    /** Sampler of actions, each action having a given weight affecting how much it is chosen */
+    static private Function<GameState, List<Float>> ClusteringHeuristicFunction;
+    static private KMeansStateClusterer clusterer;      //Clusterer
+    private List<List<ClusteringResult>> clusters;      //Results of the clustering. Initialized at expansion time...
+    /** Sampler of actions, each action having a given weight affecting how much it is chosen during simulation roll-outs*/
     private ProbabilitySampler<Integer> actionSampler;
 
     /** Other auxiliary members */
@@ -64,7 +66,8 @@ public class SingleTreeNode
 
     //Constructor of the MCTS node class.
     private SingleTreeNode(MCTSParams p, SingleTreeNode parent, int childIdx, Random rnd, int num_actions,
-                           Types.ACTIONS[] actions, int fmCallsCount, StateHeuristic sh, ProbabilitySampler<Integer> actionSampler) {
+                           Types.ACTIONS[] actions, int fmCallsCount, StateHeuristic sh,
+                           ProbabilitySampler<Integer> actionSampler) {
         this.params = p;
         this.fmCallsCount = fmCallsCount;
         this.parent = parent;
@@ -80,8 +83,10 @@ public class SingleTreeNode
             m_depth = parent.m_depth + 1;
             this.rootStateHeuristic = sh;
         }
-        else
+        else {
             m_depth = 0;
+            this.ClusteringHeuristicFunction = p.ClusteringHeuristicFunction;
+        }
         this.clusterer = new KMeansStateClusterer( (int)(this.params.maxClusterRatio*this.num_actions), this.params.nbrClustererCycles );
         this.actionSampler = actionSampler;
     }
@@ -110,6 +115,14 @@ public class SingleTreeNode
             this.rootStateHeuristic = new AdvancedHeuristic(gs, m_rnd);
     }
 
+    public SingleTreeNode getChild(Integer idx)
+    {
+        if(idx>=this.children.length)
+        {
+            throw new IllegalArgumentException("Impossible to return the requested child. Index is out of range.");
+        }
+        return this.children[idx];
+    }
 
     /**
      * Main entry point of the algorithm. Runs MCTS until budget is exhausted. Budget is determined by the MCTSParams
@@ -251,6 +264,8 @@ public class SingleTreeNode
                 // based on the similarity of the vectors
                 // of heuristic scores:
                 cur.computeClusters(expandedChildren);
+                // update the action sampling distribution:
+                cur.updateActionSamplingDistribution();
                 // select the cluster representative according to uct:
                 return cur.uctOnRepresentatives(state);
 
@@ -339,14 +354,9 @@ public class SingleTreeNode
     private void computeClusters(SingleTreeNode[] expandedChildren)
     {
         List<GameState> gss = Arrays.stream(expandedChildren).map(child->child.nodeState).collect(Collectors.toList());
-        // Create a heuristic function with only one heuristic, that is the rootStateHeuristic:
-        Function<GameState, List<Float>> heuristic = gs->{
-            List<Float> ret = new ArrayList<Float>();
-            ret.add( (float)this.rootStateHeuristic.evaluateState(gs));
-            return ret;
-        };
 
-        List<List<ClusteringResult>> clusters = clusterer.generateClusters((GameState[]) gss.toArray(), heuristic);
+        // Initialization of the clusters for this SingleTreeNode:
+        this.clusters = clusterer.generateClusters((GameState[]) gss.toArray(), ClusteringHeuristicFunction);
 
         int nbrCluster = clusters.size();
         this.representativeChildren = new ArrayList<>(nbrCluster);
@@ -372,6 +382,24 @@ public class SingleTreeNode
             SingleTreeNode repr = this.children[idxReprInChildren];
             this.representativeChildren.set(countCluster++, repr);
         }
+    }
+
+    private void updateActionSamplingDistribution()
+    {
+        Float thisEuclidianNormHeuristicScore = euclidianNorm( ClusteringHeuristicFunction.apply(this.nodeState));
+        Map<Integer, Float> new_weights = new HashMap<>(num_actions);
+        for(int idxCluster=0;idxCluster<this.clusters.size();idxCluster++)
+        {
+            List<ClusteringResult> lcr = this.clusters.get(idxCluster);
+            for(ClusteringResult cr: lcr)
+            {
+                Integer actionIdx = cr.getNodeIdx();
+                Float novelty = Math.abs( euclidianNorm(cr.getHeuristicScores()) - thisEuclidianNormHeuristicScore );
+                Float new_action_sampling_prob = novelty;
+                new_weights.put(actionIdx, new_action_sampling_prob);
+            }
+        }
+        actionSampler.updateWeights(new_weights);
     }
 
     /**

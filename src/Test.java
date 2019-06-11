@@ -1,4 +1,5 @@
 import core.Game;
+import core.GameState;
 import players.*;
 import players.mcts.LobsterParams;
 import players.mcts.LobsterPlayer;
@@ -16,6 +17,9 @@ import utils.*;
 
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.function.Function;
 
 public class Test {
 
@@ -50,6 +54,22 @@ public class Test {
         OurMCTSParams.stop_type = mctsParams.STOP_ITERATIONS;
         OurMCTSParams.heuristic_method = mctsParams.OUR_HEURISTIC;
 
+
+        MCTSParams CollapseMCTSParams = new MCTSParams();
+        CollapseMCTSParams.K = 10;//Math.sqrt(2);
+        CollapseMCTSParams.rollout_depth = 6;
+        CollapseMCTSParams.stop_type = mctsParams.STOP_ITERATIONS;
+        CollapseMCTSParams.heuristic_method = mctsParams.OUR_HEURISTIC;
+        CollapseMCTSParams.collapsing = true;
+        CollapseMCTSParams.ClusteringHeuristicFunction = gs->
+        {
+            List<Float> ret = new ArrayList<>();
+            Random rnd = new Random();
+            for(int i=0;i<=3;i++)
+                ret.add( rnd.nextFloat() );
+            return ret;
+        };
+
         RHEAParams rheaParams = new RHEAParams();
         rheaParams.heurisic_type = Constants.CUSTOM_HEURISTIC;
 /*
@@ -64,7 +84,7 @@ public class Test {
 //        players.add(new DoNothingPlayer(playerID++));
 */
         players.add(new MCTSPlayer(seed, playerID++, OurMCTSParams));
-        players.add(new SimpleEvoAgent(seed, playerID++));
+        players.add(new MCTSPlayer(seed, playerID++, CollapseMCTSParams));
         players.add(new SimpleEvoAgent(seed, playerID++));
         players.add(new RHEAPlayer(seed, playerID++, rheaParams));
 
