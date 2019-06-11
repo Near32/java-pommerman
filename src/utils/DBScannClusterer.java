@@ -26,13 +26,12 @@ public class DBScannClusterer {
     List<Float> vector;
     public  int index;
 
-    public VectorContainer(int index, List<Float> vector) {
+    VectorContainer(int index, List<Float> vector) {
       this.vector = vector;
       this.index = index;
     }
   }
 
-  DBSCANClusterer<VectorContainer> clusterer;
 
   public DBScannClusterer(int maxElements, double maxDist)  {
     this.maxElements = maxElements;
