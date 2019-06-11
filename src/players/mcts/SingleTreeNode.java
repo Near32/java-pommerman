@@ -5,11 +5,8 @@ import players.heuristics.*;
 import players.heuristics.AdvancedHeuristic;
 import players.heuristics.CustomHeuristic;
 import players.heuristics.StateHeuristic;
+import utils.*;
 import utils.Clustering.ClusteringResult;
-import utils.ElapsedCpuTimer;
-import utils.Types;
-import utils.Utils;
-import utils.Vector2d;
 
 import java.util.Arrays;
 import java.util.List;
@@ -31,8 +28,8 @@ public class SingleTreeNode
     private SingleTreeNode parent;              //Parent of this node
     private SingleTreeNode[] children;          //Children of this node.
     private List<SingleTreeNode> representativeChildren;  //Representatives of clusters of children of this node.
-    private int[] children2ClusterIdx;          //For each childe, the index of the cluster it is part of.
-    private double totValue;                    //Accummulated reward obtained from this node. Divide by nVisits to obtain Q(s,a)
+    private int[] children2ClusterIdx;          //For each child, the index of the cluster it is part of.
+    private double totValue;                    //Accumulated reward obtained from this node. Divide by nVisits to obtain Q(s,a)
     private int nVisits;                        //Number of times this node has been visited.
     private int m_depth;                        //Maximum depth (number of states ahead) reached on each iteration.
     private int num_actions;                    //Number of available actions
@@ -40,7 +37,8 @@ public class SingleTreeNode
     private StateHeuristic rootStateHeuristic;  //Heuristic to evaluate game states at the end of rollouts.
 
     static private KMeansStateClusterer clusterer;     //Clusterer
-
+    /** Sampler of actions, each action having a given weight affecting how much it is chosen */
+    private ProbabilitySampler<Integer> actionSampler;
 
     /** Other auxiliary members */
 
@@ -56,12 +54,14 @@ public class SingleTreeNode
 
 
     //Constructor of the MCTS node class.
-    SingleTreeNode(MCTSParams p, Random rnd, int num_actions, Types.ACTIONS[] actions) {
+    SingleTreeNode(MCTSParams p, Random rnd, int num_actions, Types.ACTIONS[] actions,
+                   ProbabilitySampler<Integer> actionSampler) {
         this(p, null, -1, rnd, num_actions, actions, 0, null);
     }
 
     //Constructor of the MCTS node class.
-    SingleTreeNode(GameState currentState, MCTSParams p, Random rnd, int num_actions, Types.ACTIONS[] actions) {
+    SingleTreeNode(GameState currentState, MCTSParams p, Random rnd, int num_actions, Types.ACTIONS[] actions,
+                   ProbabilitySampler<Integer> actionSampler) {
         this(currentState, p, null, -1, rnd, num_actions, actions, 0, null);
     }
 
@@ -91,25 +91,9 @@ public class SingleTreeNode
     //Constructor of the MCTS node class.
     private SingleTreeNode(GameState currentState, MCTSParams p, SingleTreeNode parent, int childIdx, Random rnd, int num_actions,
                            Types.ACTIONS[] actions, int fmCallsCount, StateHeuristic sh) {
-        this.params = p;
-        this.fmCallsCount = fmCallsCount;
-        this.parent = parent;
-        this.m_rnd = rnd;
-        this.num_actions = num_actions;
-        this.actions = actions;
+        this(p, parent, childIdx, rnd, num_actions, actions, fmCallsCount, sh);
+
         this.nodeState = currentState;
-        children = new SingleTreeNode[num_actions];
-        this.representativeChildren = new ArrayList<>();
-        children2ClusterIdx = new int[num_actions];
-        totValue = 0.0;
-        this.childIdx = childIdx;
-        if(parent != null) {
-            m_depth = parent.m_depth + 1;
-            this.rootStateHeuristic = sh;
-        }
-        else
-            m_depth = 0;
-        this.clusterer = new KMeansStateClusterer( (int)(this.params.maxClusterRatio*this.num_actions), this.params.nbrClustererCycles );
     }
 
     /**
@@ -369,11 +353,16 @@ public class SingleTreeNode
         int nbrCluster = clusters.size();
         this.representativeChildren = new ArrayList<>(nbrCluster);
         int countCluster = 0;
-        for(List<ClusteringResult> cluster: clusters)
+        // Initialise the array telling which cluster each child belongs to
+        children2ClusterIdx = new int[children.length];
+        for(int idxCluster = 0; idxCluster < clusters.size(); idxCluster++)
         {
+            List<ClusteringResult> cluster = clusters.get(idxCluster);
             List<Float> norms = new ArrayList<Float>(cluster.size());
             for (int i=0; i<cluster.size(); i++)
             {
+                // Get the absolute index of the child that's in the cluster, and set it in children2ClusterIdx
+                children2ClusterIdx[cluster.get(i).getNodeIdx()] = idxCluster;
                 norms.set(i, euclidianNorm(cluster.get(i).getHeuristicScores()));
             }
             // Find the greatest:
