@@ -398,10 +398,11 @@ public class SingleTreeNode
             List<ClusteringResult> lcr = this.clusters.get(idxCluster);
             for(ClusteringResult cr: lcr)
             {
+                // Update towards good and novel states:
                 Integer actionIdx = cr.getNodeIdx();
-                Float novelty = Math.abs( euclidianNorm(cr.getHeuristicScores()) - thisEuclidianNormHeuristicScore );
-                Float new_action_sampling_prob = novelty;
-                new_weights.put(actionIdx, new_action_sampling_prob);
+                Float novelty = euclidianNorm(cr.getHeuristicScores()) - thisEuclidianNormHeuristicScore;
+                Float new_action_sampling_unnorm_weight= novelty;
+                new_weights.put(actionIdx, new_action_sampling_unnorm_weight);
             }
         }
         actionSampler.updateWeights(new_weights);

@@ -53,23 +53,39 @@ public class Test {
         OurMCTSParams.K = 10;//Math.sqrt(2);
         OurMCTSParams.rollout_depth = 6;
         OurMCTSParams.stop_type = mctsParams.STOP_ITERATIONS;
-        OurMCTSParams.heuristic_method = mctsParams.OUR_HEURISTIC;
+        OurMCTSParams.heuristic_method = mctsParams.CUSTOM_HEURISTIC;
 
 
         MCTSParams CollapseMCTSParams = new MCTSParams();
         CollapseMCTSParams.K = 10;//Math.sqrt(2);
         CollapseMCTSParams.rollout_depth = 6;
         CollapseMCTSParams.stop_type = mctsParams.STOP_ITERATIONS;
-        CollapseMCTSParams.heuristic_method = mctsParams.OUR_HEURISTIC;
+        CollapseMCTSParams.heuristic_method = mctsParams.CUSTOM_HEURISTIC;
         CollapseMCTSParams.collapsing = true;
-        List<StateHeuristic> lch = new ArrayList<>();
-        //lch.add( new PlayerCountHeuristic() );
-        lch.add( new OurHeuristic() );
+        List<Integer> lch = new ArrayList<Integer>();
+        lch.add(0);
+        lch.add(1);
+        lch.add(2);
+        lch.add(3);
         CollapseMCTSParams.ClusteringHeuristicFunction = gs->
         {
             List<Float> ret = new ArrayList<>();
-            for(StateHeuristic sh: lch)
+            for(int shk: lch)
+            {
+                StateHeuristic sh;
+                if (shk == mctsParams.CUSTOM_HEURISTIC)
+                    sh = new CustomHeuristic(gs);
+                else if (shk == mctsParams.OUR_HEURISTIC)
+                    sh = new OurHeuristic();
+                else if (shk == mctsParams.ADVANCED_HEURISTIC) {
+                    Random rnd = new Random();
+                    sh = new AdvancedHeuristic(gs, rnd);
+                }
+                else
+                    sh = new PlayerCountHeuristic();
+
                 ret.add( (float) sh.evaluateState(gs));
+            }
             return ret;
         };
 
@@ -88,10 +104,10 @@ public class Test {
 */
         players.add(new MCTSPlayer(seed, playerID++, CollapseMCTSParams));
         players.add(new MCTSPlayer(seed, playerID++, OurMCTSParams));
-        players.add(new SimpleEvoAgent(seed, playerID++));
-        players.add(new RHEAPlayer(seed, playerID++, rheaParams));
-        //players.add(new MCTSPlayer(seed, playerID++, OurMCTSParams));
-        //players.add(new MCTSPlayer(seed, playerID++, OurMCTSParams));
+        //players.add(new SimpleEvoAgent(seed, playerID++));
+        //players.add(new RHEAPlayer(seed, playerID++, rheaParams));
+        players.add(new MCTSPlayer(seed, playerID++, OurMCTSParams));
+        players.add(new MCTSPlayer(seed, playerID++, OurMCTSParams));
 
 /*
 //        players.add(new DoNothingPlayer(playerID++));
