@@ -25,6 +25,7 @@ public class SingleTreeNode
     private SingleTreeNode parent;              //Parent of this node
     private SingleTreeNode[] children;          //Children of this node.
     private List<SingleTreeNode> representativeChildren;  //Representatives of clusters of children of this node.
+    private List<Integer> clusterIdx2RepresentativeIdxInChildren;
     private int[] children2ClusterIdx;          //For each child, the index of the cluster it is part of.
     private double totValue;                    //Accumulated reward obtained from this node. Divide by nVisits to obtain Q(s,a)
     private int nVisits;                        //Number of times this node has been visited.
@@ -76,6 +77,7 @@ public class SingleTreeNode
         this.actions = actions;
         children = new SingleTreeNode[num_actions];
         this.representativeChildren = null;
+        this.clusterIdx2RepresentativeIdxInChildren = null;
         children2ClusterIdx = new int[num_actions];
         totValue = 0.0;
         this.childIdx = childIdx;
@@ -269,11 +271,19 @@ public class SingleTreeNode
                 // update the action sampling distribution:
                 cur.updateActionSamplingDistribution();
                 // select the cluster representative according to uct:
-                return cur.uctOnRepresentatives(state);
+                if(this.params.useActionSamplingDistributionAtExpansion){
+                    return cur.uctOnRepresentativesWithActionSamplingBias(state);
+                }
+                else
+                    return cur.uctOnRepresentatives(state);
 
             } else {
                 //If fully expanded, apply UCT to pick one of the children of 'cur'
-                cur = cur.uctOnRepresentatives(state);
+                if(this.params.useActionSamplingDistributionAtExpansion){
+                    return cur.uctOnRepresentativesWithActionSamplingBias(state);
+                }
+                else
+                    cur = cur.uctOnRepresentatives(state);
             }
         }
 
@@ -362,6 +372,7 @@ public class SingleTreeNode
 
         int nbrCluster = clusters.size();
         this.representativeChildren = new ArrayList<>();
+        this.clusterIdx2RepresentativeIdxInChildren = new ArrayList<>();
         int countCluster = 0;
         // Initialise the array telling which cluster each child belongs to
         children2ClusterIdx = new int[children.length];
@@ -384,6 +395,7 @@ public class SingleTreeNode
                 int idxReprInChildren = cluster.get(idxReprInCluster).getNodeIdx();
                 SingleTreeNode repr = this.children[idxReprInChildren];
                 this.representativeChildren.add(repr);
+                this.clusterIdx2RepresentativeIdxInChildren.add(idxReprInChildren);
             }
         }
     }
@@ -404,7 +416,7 @@ public class SingleTreeNode
                 new_weights.put(actionIdx, new_action_sampling_unnorm_weight);
             }
         }
-        actionSampler.updateWeights(new_weights);
+        actionSampler.updateWeightsAveraged(new_weights);
     }
 
     /**
@@ -532,6 +544,70 @@ public class SingleTreeNode
 
         //We need to roll the state, using the Forward Model, to keep going down the tree.
         roll(state, actions[selected.childIdx]);
+
+        //Return the selected node to continue the Selection phase.
+        return selected;
+    }
+
+    /**
+     * Performs UCT in a node. Selects the action to follow during the tree policy,
+     * while trusting the bias from the Action Sampling Distribution.
+     * @param state
+     * @return
+     */
+    private SingleTreeNode uctOnRepresentativesWithActionSamplingBias(GameState state) {
+
+        // Assume UCB1 values to be estimates of each state-action branch's worth.
+        // On the other hand, the Action Sampling distribution is an estimate of each (state-)action branch's usefulness/worthwhileness.
+        // Let us derive an Action Sampling distribution from the UCB1 values and average the two distributions into our final one.
+        //
+        Map<Integer,Float> uctValues = new HashMap<>();
+        Float sum_exp_uctValues = 0.0f;
+        for (int idxRepr=0;idxRepr<this.representativeChildren.size();idxRepr++)
+        {
+            SingleTreeNode representative = this.representativeChildren.get(idxRepr);
+            //For each representative, calculate the different parts. First, exploitation:
+            double hvVal = representative.totValue;
+            double reprValue =  hvVal / (representative.nVisits + params.epsilon);  //Use epsilon to avoid /0.
+
+            //Normalize rewards between 0 and 1 for the exploitation term (allows use of sqrt(2) as balance constant K
+            double exploit = reprValue = Utils.normalise(reprValue, bounds[0], bounds[1]);
+            double explore = Math.sqrt(Math.log(this.nVisits + 1) / (representative.nVisits + params.epsilon)); //Note we can use representative.nVisits for N(s,a)
+
+            //UCB1!
+            double uctValue = exploit + params.K * explore;
+
+            //Little trick: in case there are ties of values, add some little random noise to it to break ties
+            uctValue = Utils.noise(uctValue, params.epsilon, this.m_rnd.nextDouble());
+
+            float exp_uct = (float) Math.exp(uctValue);
+            sum_exp_uctValues += exp_uct;
+            uctValues.put(idxRepr, exp_uct);
+        }
+
+        // (Softmax) Normalization:
+        for (int i=0;i<uctValues.size();i++)
+            uctValues.replace(i, uctValues.get(i)/sum_exp_uctValues);
+
+        // (Representatives-only) Action Sampling Distribution:
+        Map<Integer, Float> reprOnlyActionSamplDist = new HashMap<>();
+        Map<Integer, Float> actionSamplDist = actionSampler.getWeights();
+        for(int idxCluster=0; idxCluster<clusterIdx2RepresentativeIdxInChildren.size();idxCluster++)
+        {
+           int idxReprInChildren = clusterIdx2RepresentativeIdxInChildren.get(idxCluster);
+           reprOnlyActionSamplDist.put( idxCluster, actionSamplDist.get(idxReprInChildren) );
+        }
+
+        // Fusion:
+        ProbabilitySampler<Integer> averageASD = new ProbabilitySampler<Integer>(uctValues,1);
+        averageASD.updateWeightsAveraged(reprOnlyActionSamplDist);
+
+        int actionIdxInRepr = averageASD.sample(null);
+        int actionIdx = clusterIdx2RepresentativeIdxInChildren.get(actionIdxInRepr);
+        SingleTreeNode selected = this.representativeChildren.get(actionIdxInRepr);
+
+        //We need to roll the state, using the Forward Model, to keep going down the tree.
+        roll(state, actions[actionIdx]);
 
         //Return the selected node to continue the Selection phase.
         return selected;

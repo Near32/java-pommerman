@@ -1,15 +1,11 @@
 package players.mcts;
 
 import core.GameState;
-import players.heuristics.StateHeuristic;
-import players.heuristics.CustomHeuristic;
+import players.heuristics.*;
 import javafx.util.Pair;
 import players.optimisers.ParameterSet;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 
 @SuppressWarnings("WeakerAccess")
@@ -27,12 +23,14 @@ public class MCTSParams implements ParameterSet {
 
     public final int CUSTOM_HEURISTIC = 0;
     public final int ADVANCED_HEURISTIC = 1;
-    public final int OUR_HEURISTIC= 3;
+    public final int OUR_HEURISTIC= 2;
 
     public double epsilon = 1e-6;
 
+    // Collapsing-MCTS:
     public boolean collapsing = false;        // Whether we use Vanilla/Collapsing-MCTS.
     public Function<GameState, List<Float>> ClusteringHeuristicFunction = null;
+    public boolean useActionSamplingDistributionAtExpansion = false;
     public int nbrUpdates2Uniform = 100;
     public float maxClusterRatio = 0.25f;
     public int nbrClustererCycles = 4;
@@ -54,6 +52,12 @@ public class MCTSParams implements ParameterSet {
             case "K": K = (double) value; break;
             case "rollout_depth": rollout_depth = (int) value; break;
             case "heuristic_method": heuristic_method = (int) value; break;
+            // Our params
+            case "collapsing": collapsing = (boolean) value; break;
+            case "ClusteringHeuristicFunction": ClusteringHeuristicFunction = (Function<GameState, List<Float>>) value; break;
+            case "nbrUpdates2Uniform": nbrUpdates2Uniform = (int) value; break;
+            case "maxClusterRatio": maxClusterRatio = (float) value; break;
+            case "nbrClustererCycles": nbrClustererCycles = (int) value; break;
         }
     }
 
@@ -63,6 +67,13 @@ public class MCTSParams implements ParameterSet {
             case "K": return K;
             case "rollout_depth": return rollout_depth;
             case "heuristic_method": return heuristic_method;
+
+            // Our params
+            case "collapsing": return collapsing;
+            case "ClusteringHeuristicFunction": return ClusteringHeuristicFunction;
+            case "nbrUpdates2Uniform": return nbrUpdates2Uniform;
+            case "maxClusterRatio": return maxClusterRatio;
+            case "nbrClustererCycles": return nbrClustererCycles;
         }
         return null;
     }
@@ -73,15 +84,51 @@ public class MCTSParams implements ParameterSet {
         paramList.add("K");
         paramList.add("rollout_depth");
         paramList.add("heuristic_method");
+
+        paramList.add("collapsing");
+        paramList.add("ClusteringHeuristicFunction");
+        paramList.add("nbrUpdates2Uniform");
+        paramList.add("maxClusterRatio");
+        paramList.add("nbrClustererCycles");
         return paramList;
     }
 
     @Override
     public Map<String, Object[]> getParameterValues() {
+        List<Function<GameState, List<Float>>> clusterHeuristics = new ArrayList<>();
+        clusterHeuristics.add(gs->
+        {
+            List<Float> ret = new ArrayList<>();
+            for(int shk: new Integer[] {0, 1, 2, 3})
+            {
+                StateHeuristic sh;
+                if (shk == this.CUSTOM_HEURISTIC)
+                    sh = new CustomHeuristic(gs);
+                else if (shk == this.OUR_HEURISTIC)
+                    sh = new OurHeuristic();
+                else if (shk == this.ADVANCED_HEURISTIC) {
+                    Random rnd = new Random();
+                    sh = new AdvancedHeuristic(gs, rnd);
+                }
+                else
+                    sh = new PlayerCountHeuristic();
+
+                ret.add( (float) sh.evaluateState(gs));
+            }
+            return ret;
+        });
+
         HashMap<String, Object[]> parameterValues = new HashMap<>();
         parameterValues.put("K", new Double[]{1.0, Math.sqrt(2), 2.0});
         parameterValues.put("rollout_depth", new Integer[]{5, 8, 10, 12, 15});
         parameterValues.put("heuristic_method", new Integer[]{CUSTOM_HEURISTIC, ADVANCED_HEURISTIC, OUR_HEURISTIC});
+
+        parameterValues.put("collapsing", new Boolean[] {true, false});
+        parameterValues.put("ClusteringHeuristicFunction", clusterHeuristics.toArray());
+        parameterValues.put("nbrUpdates2Uniform", new Integer[] {50, 100, 200});
+        parameterValues.put("maxClusterRatio", new Float[] {0.1f, 0.25f, 0.4f, 0.6f});
+        parameterValues.put("nbrClustererCycles", new Integer[] {1, 4, 8});
+
         return parameterValues;
     }
 

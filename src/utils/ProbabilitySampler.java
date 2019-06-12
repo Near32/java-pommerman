@@ -43,7 +43,7 @@ public class ProbabilitySampler<T> {
 
     public T sample(Map<T,Boolean> mask)
     {
-        float weightSum = weightSum(mask);
+        float weightSum = weightSum(this.weights, mask);
         float rn = random.nextFloat() * weightSum;
         float rangeMin = 0;
         T ret = null;
@@ -81,6 +81,18 @@ public class ProbabilitySampler<T> {
         }
     }
 
+    public void updateWeightsAveraged(Map<T,Float> weights)
+    {
+        weights = softmax(weights);
+        this.weights = softmax(this.weights);
+        for(T key: this.weights.keySet())
+        {
+            Float new_w = this.weights.get(key) + weights.get(key);
+            this.weights.replace( key, new_w);
+        }
+        this.weights = softmax(this.weights);
+    }
+
     /**
      * Updates the distribution towards the Uniform distribution.
      * @returns boolean specifying whether the distribution is uniform already or not.
@@ -105,9 +117,14 @@ public class ProbabilitySampler<T> {
         }
     }
 
-    private float weightSum(Map<T,Boolean> mask)
+    public Map<T, Float> getWeights()
     {
-        int sum = 0;
+        return this.weights;
+    }
+
+    public static <T> Float weightSum(Map<T, Float> weights, Map<T,Boolean> mask)
+    {
+        Float sum = 0f;
         for(Map.Entry<T, Float> kv : weights.entrySet())
         {
             T key = kv.getKey();
@@ -116,6 +133,23 @@ public class ProbabilitySampler<T> {
             }
         }
         return sum;
+    }
+
+    public static <T> Map<T, Float> softmax(Map<T, Float> weights)
+    {
+        for(T key: weights.keySet())
+        {
+            Float new_w = (float) Math.exp(weights.get(key));
+            weights.replace( key, new_w);
+        }
+        Float sum_exp = weightSum(weights, null);
+        for(T key: weights.keySet())
+        {
+            Float new_w = weights.get(key)/sum_exp;
+            weights.replace( key, new_w);
+        }
+
+        return weights;
     }
 
 
