@@ -1,24 +1,24 @@
 package players.heuristics;
 
+
 import core.GameState;
 import utils.Types;
-import utils.Vector2d;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class OurHeuristic extends StateHeuristic {
+public class MultiHeuristicA {
 
     private int increaseParam = 2;
     private double lambda = 0.99;
     private double lambdaDeltaVSDXY = 0.99;
     private double lambdaEnemiesVSPlayer = 0.99;
 
-    @Override
-    public double evaluateState(GameState gs) {
+    public List<Double> evaluateState(GameState gs) {
         double value;
         double valueP;
         double valueCloseToB;
+        List<Double> values = new ArrayList<>();
 
         if(gs.winner() == Types.RESULT.WIN)
             value = 1;
@@ -34,6 +34,7 @@ public class OurHeuristic extends StateHeuristic {
                 }
             }
             valueP = 1.0 / pCount;
+            values.add(valueP);
 
             Types.TILETYPE[][] board = gs.getBoard();
             int[][] bombBS = gs.getBombBlastStrength();
@@ -83,14 +84,18 @@ public class OurHeuristic extends StateHeuristic {
 
             if(countBomb == 0){ countBomb=1;}
             //Let us incentivise the agent to have agents (in general) to be close to bombs while being itself on some diagonals rather on the direct line of blast (and have enemies on the direct line of blast):
-            valueCloseToB = (lambdaDeltaVSDXY) / (0.001+sumDelta/countBomb) + (1-lambdaDeltaVSDXY) / (0.001+sumDXY/countBomb);
-
+            double v1 = 1.0 / (0.001+sumDelta/countBomb);
+            double v2 = 1.0 / (0.001+sumDXY/countBomb);
+            valueCloseToB = (lambdaDeltaVSDXY)*v1+ (1-lambdaDeltaVSDXY)*v2;
+            values.add(v1);
+            values.add(v2);
+            values.add(valueCloseToB);
 
 
             value = (1.0-lambda)*valueP+lambda*valueCloseToB;
+            values.add(value);
         }
 
-        return value;
+        return values;
     }
 }
-
