@@ -674,6 +674,7 @@ public class SingleTreeNode
                 nAction = m_rnd.nextInt(actionsToTry.size());
             }
             Types.ACTIONS act = actionsToTry.get(nAction);
+
             Vector2d dir = act.getDirection().toVec();
 
             Vector2d pos = state.getPosition();
@@ -682,11 +683,15 @@ public class SingleTreeNode
 
             //Make sure there are no flames that would kill me there.
             if (x >= 0 && x < width && y >= 0 && y < height)
-                if(board[y][x] != Types.TILETYPE.FLAMES)
+                if (board[y][x] != Types.TILETYPE.FLAMES)
                     return nAction;
 
-            actionsToTry.remove(nAction);
-            if(this.params.collapsing) { mask.replace(nAction, false); }
+            if (this.params.collapsing) {
+                mask.replace(nAction, false);
+            }
+            else {
+                actionsToTry.remove(nAction);
+            }
         }
 
         //If we got here, we couldn't find an action that wouldn't kill me. We can take any, really.

@@ -158,6 +158,9 @@ public class KMeansStateClusterer implements Clusterer {
       int closestMeanIndex = -1;
       for (int j = 0; j < mean.size(); j++) {
         float distance = findVectorDistance(mean.get(j), heuristicVectors.get(i), metric);
+        if(Float.isNaN(distance)) {
+          System.out.println(distance);
+        }
         if (distance < closest) {
           closest = distance;
           closestMeanIndex = j;

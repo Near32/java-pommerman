@@ -149,7 +149,7 @@ public class MCTSParams implements ParameterSet {
         parameterValues.put("rollout_depth", new Integer[]{5, 8, 10, 12, 15});
         parameterValues.put("heuristic_method", new Integer[]{CUSTOM_HEURISTIC, ADVANCED_HEURISTIC, OUR_HEURISTIC});
 
-        parameterValues.put("collapsing", new Boolean[] {true, false});
+        parameterValues.put("collapsing", new Boolean[] {true});
         parameterValues.put("ClusteringHeuristicFunction", clusterHeuristics.toArray());
         parameterValues.put("nbrUpdates2Uniform", new Integer[] {50, 100, 200});
         parameterValues.put("maxClusterRatio", new Float[] {0.1f, 0.25f, 0.4f, 0.6f});
@@ -159,7 +159,7 @@ public class MCTSParams implements ParameterSet {
         parameterValues.put("useDBScan", new Boolean[] {true, false});
         parameterValues.put("distanceMeasure", new Integer[] {0,1,2,3});
         parameterValues.put("DBSscanMaxElements", new Integer[] {4,8,10,12});
-        parameterValues.put("DBSscanMaxDist", new Float[] {0.4f,.8f,1.2f,1.6f});
+        parameterValues.put("DBSscanMaxDist", new Float[] {0.1f,0.2f,0.4f,0.6f});
 
         return parameterValues;
     }
