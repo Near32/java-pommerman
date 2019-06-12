@@ -673,20 +673,33 @@ public class SingleTreeNode
             else{
                 nAction = m_rnd.nextInt(actionsToTry.size());
             }
-            Types.ACTIONS act = actionsToTry.get(nAction);
-            Vector2d dir = act.getDirection().toVec();
+            try {
+                // nAction is one too big here? Once in a blue moon, too
+                // collapsing is true, so there is an issue with actionSampler.sample(mask)
+                // Mask though, is size 47. actionsToTry size is 46. Hmm
+                Types.ACTIONS act = actionsToTry.get(nAction);
 
-            Vector2d pos = state.getPosition();
-            int x = pos.x + dir.x;
-            int y = pos.y + dir.y;
+                Vector2d dir = act.getDirection().toVec();
 
-            //Make sure there are no flames that would kill me there.
-            if (x >= 0 && x < width && y >= 0 && y < height)
-                if(board[y][x] != Types.TILETYPE.FLAMES)
-                    return nAction;
+                Vector2d pos = state.getPosition();
+                int x = pos.x + dir.x;
+                int y = pos.y + dir.y;
 
-            actionsToTry.remove(nAction);
-            if(this.params.collapsing) { mask.replace(nAction, false); }
+                //Make sure there are no flames that would kill me there.
+                if (x >= 0 && x < width && y >= 0 && y < height)
+                    if (board[y][x] != Types.TILETYPE.FLAMES)
+                        return nAction;
+
+                if (this.params.collapsing) {
+                    mask.replace(nAction, false);
+                }
+                else {
+                    actionsToTry.remove(nAction);
+                }
+            }
+            catch(Exception e) {
+                System.out.println("Curse you weird action shenanigans");
+            }
         }
 
         //If we got here, we couldn't find an action that wouldn't kill me. We can take any, really.
