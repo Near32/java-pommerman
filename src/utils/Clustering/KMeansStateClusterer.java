@@ -17,7 +17,7 @@ public class KMeansStateClusterer {
   private Integer cycles;
 
   public static void main(String[] args) throws Exception {
-    KMeansStateClusterer clusterer = new KMeansStateClusterer(2,4);
+    KMeansStateClusterer clusterer = new KMeansStateClusterer(2, 4);
     List<GameState> gss = new ArrayList<GameState>();
     long seed = 1;
     int size = 11;
@@ -28,8 +28,8 @@ public class KMeansStateClusterer {
 
     List<List<ClusteringResult>> clusters = clusterer.generateClusters(gss, gs->{
       List<Float> fake = new ArrayList<>();
-      for(int i = 0; i < 2; i++) {
-        fake.add(clusterer.RandomWithinRange(0,1));
+      for (int i = 0; i < 2; i++) {
+        fake.add(clusterer.RandomWithinRange(0, 1));
       }
       System.out.println("Generated Thing: " + printVector(fake));
 
@@ -37,10 +37,10 @@ public class KMeansStateClusterer {
     });
 
     System.out.println("Amount of clusters: " + clusters.size());
-    for(int i = 0; i < clusters.size(); i++ ) {
+    for (int i = 0; i < clusters.size(); i++) {
       System.out.println("Cluster " + i);
-        System.out.println("Generated Thing: " + printIntVector(clusters.get(i)));
-      
+      System.out.println("Generated Thing: " + printIntVector(clusters.get(i)));
+
     }
   }
 
@@ -157,14 +157,78 @@ public class KMeansStateClusterer {
     return result;
   }
 
-  public static float findVectorDistance(List<Float> vector1, List<Float> vector2) {
-    float dist = 0;
-    for (int i = 0; i < vector1.size(); i++) {
-      float diff = (vector1.get(i) - vector2.get(i));
-      dist += diff * diff;
+  //Borrowed from https://stackoverflow.com/questions/28428365/how-to-find-correlation-between-two-integer-arrays-in-java
+  public static float pearsonCorrelationDistance(List<Float> xs, List<Float> ys) {
+    double sx = 0.0;
+    double sy = 0.0;
+    double sxx = 0.0;
+    double syy = 0.0;
+    double sxy = 0.0;
+
+    int n = xs.size();
+
+    for(int i = 0; i < n; ++i) {
+      double x = xs.get(i);
+      double y = ys.get(i);
+
+      sx += x;
+      sy += y;
+      sxx += x * x;
+      syy += y * y;
+      sxy += x * y;
     }
-    return (float) Math.sqrt(dist);
+
+    // covariation
+    double cov = sxy / n - sx * sy / n / n;
+    // standard error of x
+    double sigmax = Math.sqrt(sxx / n -  sx * sx / n / n);
+    // standard error of y
+    double sigmay = Math.sqrt(syy / n -  sy * sy / n / n);
+
+    // correlation is just a normalized covariation
+    return  1-(float)(cov / sigmax / sigmay);
   }
+
+
+  public static float eisenCosineCorrelationDistance(List<Float> vector1, List<Float> vector2) {
+    float top = 0;
+    float xsq = 0;
+    float ysq = 0;
+    for (int i = 0; i < vector1.size(); i++) {
+      top += vector1.get(i) * vector2.get(i);
+      xsq += Math.pow(vector1.get(i), 2);
+      ysq += Math.pow(vector2.get(i), 2);
+    }
+    return 1.0f - ((float) (Math.abs(top) / Math.sqrt(xsq * ysq)));
+  }
+
+  public static float findVectorDistance(List<Float> vector1, List<Float> vector2) {
+    int type = 0;
+    float dist = 0;
+
+    switch (type) {
+      case 3:
+        return pearsonCorrelationDistance(vector1, vector2);
+      case 2:
+        //EisenCosine Correlation
+        return eisenCosineCorrelationDistance(vector1, vector2);
+      case 1:
+        //Manhattan distance
+        for (int i = 0; i < vector1.size(); i++) {
+          dist += Math.abs(vector1.get(i) - vector2.get(i));
+        }
+        return (dist);
+      case 0:
+      default:
+        //Euclidean distance
+        for (int i = 0; i < vector1.size(); i++) {
+          float diff = (vector1.get(i) - vector2.get(i));
+          dist += diff * diff;
+        }
+        return (float) Math.sqrt(dist);
+    }
+  }
+
 
   public static void normaliseVectors(List<List<Float>> heuristicVectors, int vectorLength, List<Float> min, List<Float> max) {
     for (int i = 0; i < vectorLength; i++) {
