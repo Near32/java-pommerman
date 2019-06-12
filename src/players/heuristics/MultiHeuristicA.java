@@ -35,7 +35,7 @@ public class MultiHeuristicA {
                 pCount+=increaseParam;
             }
         }
-        valueP = 1.0 / pCount;
+        valueP = 1.0 / (pCount+1);
         values.add(valueP);
 
         Types.TILETYPE[][] board = gs.getBoard();

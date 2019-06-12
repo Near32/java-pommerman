@@ -248,8 +248,8 @@ public class KMeansStateClusterer implements Clusterer {
 
   static void normaliseVectors(List<List<Float>> heuristicVectors, int vectorLength, List<Float> min, List<Float> max) {
     for (int i = 0; i < vectorLength; i++) {
-      float minVal = Integer.MAX_VALUE;
-      float maxVal = Integer.MIN_VALUE;
+      float minVal = Float.MAX_VALUE;
+      float maxVal = Float.MIN_VALUE;
       for (List<Float> heuristicVector : heuristicVectors) {
         float value = heuristicVector.get(i);
         minVal = Math.min(value, minVal);
