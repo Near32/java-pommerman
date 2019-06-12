@@ -3,6 +3,7 @@ package players.mcts;
 import core.GameState;
 import players.optimisers.ParameterizedPlayer;
 import players.Player;
+import utils.Clustering.DBScannClusterer;
 import utils.ElapsedCpuTimer;
 import utils.Types;
 import utils.ProbabilitySampler;
@@ -57,7 +58,12 @@ public class MCTSPlayer extends ParameterizedPlayer {
         for (Types.ACTIONS act : actionsList) {
             actions[i++] = act;
         }
-
+        if(this.params.useDBScan) {
+            System.out.println("Using DBSCann");
+            }
+        else {
+            System.out.println("Not using DBSCann");
+        }
         if(this.params.collapsing)
         {
             this.tree_action_sampler = evenWeights();

@@ -21,7 +21,7 @@ public class DBScannClusterer implements Clusterer{
   private final int maxElements;
   private final double maxDist;
   private Clusterer.DISTANCE_METRIC metric;
-
+private Clusterer backupClusterer;
   private static double calculateDistance(VectorContainer x, VectorContainer b, Clusterer.DISTANCE_METRIC metric) {
     return findVectorDistance(x.vector, b.vector,metric);
   }
@@ -37,11 +37,12 @@ public class DBScannClusterer implements Clusterer{
   }
 
 
-  public DBScannClusterer(int maxElements, double maxDist,Clusterer.DISTANCE_METRIC metric)  {
+  public DBScannClusterer(int maxElements, double maxDist,Clusterer.DISTANCE_METRIC metric,  Clusterer backupClusterer)  {
     this.maxElements = maxElements;
     this.maxDist = maxDist;
 
     this.metric = metric;
+    this.backupClusterer = backupClusterer;
   }
 
   public List<List<ClusteringResult>> generateClusters(List<GameState> gamestates, Function<GameState, List<Float>> heuristicFunction) {

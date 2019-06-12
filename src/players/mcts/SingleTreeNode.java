@@ -37,7 +37,7 @@ public class SingleTreeNode
     private StateHeuristic rootStateHeuristic;  //Heuristic to evaluate game states at the end of rollouts.
 
     static private Function<GameState, List<Float>> ClusteringHeuristicFunction;
-    private Clusterer clusterer;      //Clusterer
+    static private Clusterer clusterer;      //Clusterer
     private List<List<ClusteringResult>> clusters;      //Results of the clustering. Initialized at expansion time...
     /** Sampler of actions, each action having a given weight affecting how much it is chosen during simulation roll-outs*/
     private ProbabilitySampler<Integer> actionSampler;
@@ -91,10 +91,12 @@ public class SingleTreeNode
             m_depth = 0;
             this.ClusteringHeuristicFunction = p.ClusteringHeuristicFunction;
         }
+        this.clusterer = new KMeansStateClusterer((int) (this.params.maxClusterRatio * this.num_actions), this.params.nbrClustererCycles, this.params.distanceMeasure);
+
         if(this.params.useDBScan) {
-            this.clusterer = new DBScannClusterer(this.params.DBSscanMaxElements, this.params.DBSscanMaxDist, this.params.distanceMeasure);
-        }else {
-            this.clusterer = new KMeansStateClusterer((int) (this.params.maxClusterRatio * this.num_actions), this.params.nbrClustererCycles, this.params.distanceMeasure);
+            this.clusterer = new DBScannClusterer(this.params.DBSscanMaxElements, this.params.DBSscanMaxDist, this.params.distanceMeasure,this.clusterer );
+        }
+        else {
         }
         this.actionSampler = actionSampler;
     }
@@ -185,7 +187,6 @@ public class SingleTreeNode
      *                     time is exhausted.
      */
     void collapseMctsSearch(ElapsedCpuTimer elapsedTimer) {
-
         //Some auxiliary variables to manage different budget expirations
         long remaining;
         int numIters = 0;
