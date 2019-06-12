@@ -4,6 +4,7 @@ import core.GameState;
 import players.heuristics.*;
 import javafx.util.Pair;
 import players.optimisers.ParameterSet;
+import utils.Clustering.Clusterer;
 
 import java.util.*;
 import java.util.function.Function;
@@ -31,9 +32,13 @@ public class MCTSParams implements ParameterSet {
     public boolean collapsing = false;        // Whether we use Vanilla/Collapsing-MCTS.
     public Function<GameState, List<Float>> ClusteringHeuristicFunction = null;
     public boolean useActionSamplingDistributionAtExpansion = false;
+    public  boolean useDBScan =false;
     public int nbrUpdates2Uniform = 100;
     public float maxClusterRatio = 0.25f;
     public int nbrClustererCycles = 4;
+    public Clusterer.DISTANCE_METRIC distanceMeasure = Clusterer.DISTANCE_METRIC.Euclidean;
+    public int DBSscanMaxElements = 4;
+    public double DBSscanMaxDist = 1;
 
     // Parameters
     public double K = Math.sqrt(2);
