@@ -67,13 +67,11 @@ public class Test {
         CollapseMCTSParams.maxClusterRatio = 0.25f;
         CollapseMCTSParams.nbrClustererCycles = 100;
         List<Integer> lch = new ArrayList<Integer>();
-        List<Integer> mask4ActionSamplDistrUpdate = new ArrayList<Integer>();
         //lch.add(0);
         //lch.add(1);
-        lch.add(2);
-        //mask4ActionSamplDistrUpdate.add()
+        //lch.add(2);
         lch.add(3);
-        lch.add(4);
+        //lch.add(4);
         CollapseMCTSParams.ClusteringHeuristicFunction = gs->
         {
             List<Float> ret = new ArrayList<>();
@@ -82,7 +80,9 @@ public class Test {
                 // 3
                 if (shk == mctsParams.MULTI_HEURISTIC_A) {
                     MultiHeuristicA sh = new MultiHeuristicA();
-                    for (double value: sh.evaluateState(gs)) {
+                    List<Double> values = sh.evaluateState(gs);
+                    for(int i=0;i<values.size();i++){
+                        double value = values.get(i);
                         ret.add( (float) value);
                     }
                 }
