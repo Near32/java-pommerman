@@ -158,7 +158,7 @@ public class KMeansStateClusterer implements Clusterer {
         }
       }
       if(closestMeanIndex == -1) {
-        System.out.println("Okay, so no closest mean index, possibly because mean size was 0? Skipping");
+        System.out.println("Okay, so no closest mean index, possibly because mean size was 0? Skipping?");
       }
       result.get(closestMeanIndex).add(i);
     }
