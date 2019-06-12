@@ -67,10 +67,10 @@ public class Test {
         CollapseMCTSParams.maxClusterRatio = 0.25f;
         CollapseMCTSParams.nbrClustererCycles = 100;
         List<Integer> lch = new ArrayList<Integer>();
-        lch.add(0);
-        lch.add(1);
+        //lch.add(0);
+        //lch.add(1);
         lch.add(2);
-        lch.add(3);
+        //lch.add(3);
         CollapseMCTSParams.ClusteringHeuristicFunction = gs->
         {
             List<Float> ret = new ArrayList<>();
@@ -87,8 +87,8 @@ public class Test {
                 }
                 else
                     sh = new PlayerCountHeuristic();
-
-                ret.add( (float) sh.evaluateState(gs));
+                ret.add( (float) sh.evaluateState(gs)) ;
+                //ret.add( (float) Utils.sigmoid(sh.evaluateState(gs)) );
             }
             return ret;
         };

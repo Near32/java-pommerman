@@ -95,6 +95,11 @@ public class Utils
         return maxIndex;
     }
 
+    public static double sigmoid(double value)
+    {
+        return 1.0/(1.0+Math.exp(-value));
+    }
+
     //Concatenates the elements of a String array into a String object, separated by ','
     public static String toStringArray(String[] array)
     {
