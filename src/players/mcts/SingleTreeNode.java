@@ -38,7 +38,7 @@ public class SingleTreeNode
     static private KMeansStateClusterer clusterer;      //Clusterer
     private List<List<ClusteringResult>> clusters;      //Results of the clustering. Initialized at expansion time...
     /** Sampler of actions, each action having a given weight affecting how much it is chosen during simulation roll-outs*/
-    private ProbabilitySampler<Integer> actionSampler;
+    public ProbabilitySampler<Integer> actionSampler;
 
     /** Other auxiliary members */
 

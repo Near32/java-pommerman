@@ -111,7 +111,12 @@ public class MCTSPlayer extends ParameterizedPlayer {
         else {
             if(params.collapsing && tree_action_sampler == null)
                 tree_action_sampler = evenWeights();
-            m_root = new SingleTreeNode(params, m_rnd, num_actions, actions, tree_action_sampler);
+
+            m_root = new SingleTreeNode(params, m_rnd, num_actions, actions,
+                    // If we have a global action distribution, use MCTSPlayers'. Else, create a new set if even weights
+                    params.globalActionDistribution?
+                            tree_action_sampler
+                            : evenWeights());
         }
         m_root.setRootGameState(gs);
 
@@ -124,6 +129,8 @@ public class MCTSPlayer extends ParameterizedPlayer {
         //Determine the best action to take and return it.
         int action = m_root.mostVisitedAction();
 
+        checkEqualSamplers(m_root);
+
         // Make sure that we will re-use the tree at the next iteration:
         if(this.params.reuse_tree){
             this.previous_root = m_root;
@@ -131,6 +138,12 @@ public class MCTSPlayer extends ParameterizedPlayer {
 
         //... and return it.
         return actions[action];
+    }
+
+    public void checkEqualSamplers(SingleTreeNode node) {
+        boolean allEqual = true;
+        allEqual = node.actionSampler == tree_action_sampler;
+        System.out.println(allEqual);
     }
 
     @Override

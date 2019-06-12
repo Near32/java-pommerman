@@ -29,11 +29,13 @@ public class MCTSParams implements ParameterSet {
 
     // Collapsing-MCTS:
     public boolean collapsing = false;        // Whether we use Vanilla/Collapsing-MCTS.
-    public Function<GameState, List<Float>> ClusteringHeuristicFunction = null;
+    public Function<GameState, List<Float>> ClusteringHeuristicFunction = null; // Make sure to set this if clustering is true
     public boolean useActionSamplingDistributionAtExpansion = false;
     public int nbrUpdates2Uniform = 100;
     public float maxClusterRatio = 0.25f;
     public int nbrClustererCycles = 4;
+    /** Controls whether there is one action probability distribution for the whole tree, or one per node */
+    public boolean globalActionDistribution = false;
 
     // Parameters
     public double K = Math.sqrt(2);
@@ -58,6 +60,7 @@ public class MCTSParams implements ParameterSet {
             case "nbrUpdates2Uniform": nbrUpdates2Uniform = (int) value; break;
             case "maxClusterRatio": maxClusterRatio = (float) value; break;
             case "nbrClustererCycles": nbrClustererCycles = (int) value; break;
+            case "globalActionDistribution": globalActionDistribution = (boolean) value; break;
         }
     }
 
@@ -74,6 +77,7 @@ public class MCTSParams implements ParameterSet {
             case "nbrUpdates2Uniform": return nbrUpdates2Uniform;
             case "maxClusterRatio": return maxClusterRatio;
             case "nbrClustererCycles": return nbrClustererCycles;
+            case "globalActionDistribution": return globalActionDistribution;
         }
         return null;
     }
@@ -90,6 +94,7 @@ public class MCTSParams implements ParameterSet {
         paramList.add("nbrUpdates2Uniform");
         paramList.add("maxClusterRatio");
         paramList.add("nbrClustererCycles");
+        paramList.add("globalActionDistribution");
         return paramList;
     }
 
@@ -128,6 +133,7 @@ public class MCTSParams implements ParameterSet {
         parameterValues.put("nbrUpdates2Uniform", new Integer[] {50, 100, 200});
         parameterValues.put("maxClusterRatio", new Float[] {0.1f, 0.25f, 0.4f, 0.6f});
         parameterValues.put("nbrClustererCycles", new Integer[] {1, 4, 8});
+        parameterValues.put("globalActionDistribution", new Boolean[] {true, false});
 
         return parameterValues;
     }
