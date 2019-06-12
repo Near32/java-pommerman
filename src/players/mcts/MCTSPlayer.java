@@ -34,6 +34,7 @@ public class MCTSPlayer extends ParameterizedPlayer {
      */
     private SingleTreeNode previous_root = null;
 
+    // TODO: So far the action sampler is only for the whole tree. We can implement per-node
     public ProbabilitySampler<Integer> tree_action_sampler;
 
     public MCTSPlayer(long seed, int id) {
@@ -59,11 +60,15 @@ public class MCTSPlayer extends ParameterizedPlayer {
 
         if(this.params.collapsing)
         {
-            // Reset the action sampling distribution to a uniform one.
-            Map<Integer, Float> weights = new HashMap<Integer,Float>(actions.length);
-            for(int ai=0;ai<actions.length;ai++)  {   weights.put(ai, 1.0f);    }
-            this.tree_action_sampler = new ProbabilitySampler<Integer>(weights,this.params.nbrUpdates2Uniform);
+            this.tree_action_sampler = evenWeights();
         }
+    }
+
+    private ProbabilitySampler<Integer> evenWeights() {
+        // Reset the action sampling distribution to a uniform one.
+        Map<Integer, Float> weights = new HashMap<Integer,Float>(actions.length);
+        for(int ai=0;ai<actions.length;ai++)  {   weights.put(ai, 1.0f);    }
+        return new ProbabilitySampler<Integer>(weights,this.params.nbrUpdates2Uniform);
     }
 
     /**
@@ -104,6 +109,8 @@ public class MCTSPlayer extends ParameterizedPlayer {
             m_root = this.previous_root.getChild(this.previous_root.mostVisitedAction());
         }
         else {
+            if(params.collapsing && tree_action_sampler == null)
+                tree_action_sampler = evenWeights();
             m_root = new SingleTreeNode(params, m_rnd, num_actions, actions, tree_action_sampler);
         }
         m_root.setRootGameState(gs);
