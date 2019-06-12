@@ -663,7 +663,8 @@ public class SingleTreeNode
         int height = board[0].length;
 
         //For all actions
-        while(actionsToTry.size() > 0) {
+        int removedActions = 0;
+        while(actionsToTry.size() > 0 || removedActions == mask.size()) {
 
             //See where would this take me.
             int nAction;
@@ -692,6 +693,7 @@ public class SingleTreeNode
             else {
                 actionsToTry.remove(nAction);
             }
+            removedActions++;
         }
 
         //If we got here, we couldn't find an action that wouldn't kill me. We can take any, really.
