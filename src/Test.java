@@ -62,6 +62,7 @@ public class Test {
         CollapseMCTSParams.stop_type = mctsParams.STOP_ITERATIONS;
         CollapseMCTSParams.heuristic_method = mctsParams.OUR_HEURISTIC;
         CollapseMCTSParams.collapsing = true;
+        CollapseMCTSParams.useActionSamplingDistributionAtExpansion = false;
         CollapseMCTSParams.nbrUpdates2Uniform = 100;
         CollapseMCTSParams.maxClusterRatio = 0.25f;
         CollapseMCTSParams.nbrClustererCycles = 100;

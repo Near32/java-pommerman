@@ -61,7 +61,7 @@ public class MCTSPlayer extends ParameterizedPlayer {
         {
             // Reset the action sampling distribution to a uniform one.
             Map<Integer, Float> weights = new HashMap<Integer,Float>(actions.length);
-            for(int ai=0;ai<=actions.length;ai++)  {   weights.put(ai, 1.0f);    }
+            for(int ai=0;ai<actions.length;ai++)  {   weights.put(ai, 1.0f);    }
             this.tree_action_sampler = new ProbabilitySampler<Integer>(weights,this.params.nbrUpdates2Uniform);
         }
     }
