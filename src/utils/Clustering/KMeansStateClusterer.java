@@ -11,13 +11,14 @@ import java.util.stream.Collectors;
 import utils.Clustering.ClusteringResult;
 import utils.Types;
 
-public class KMeansStateClusterer {
+public class KMeansStateClusterer implements Clusterer {
   private Integer meansExpected;
   private Random random = new Random();
   private Integer cycles;
+  private DISTANCE_METRIC metric;
 
   public static void main(String[] args) throws Exception {
-    KMeansStateClusterer clusterer = new KMeansStateClusterer(2, 4);
+    KMeansStateClusterer clusterer = new KMeansStateClusterer(2, 4,DISTANCE_METRIC.Euclidean);
     List<GameState> gss = new ArrayList<GameState>();
     long seed = 1;
     int size = 11;
@@ -52,9 +53,10 @@ public class KMeansStateClusterer {
     return vector.stream().map(Object::toString).collect(Collectors.joining(","));
   }
 
-  public KMeansStateClusterer(Integer meansExpected, Integer cycles) {
+  public KMeansStateClusterer(Integer meansExpected, Integer cycles, DISTANCE_METRIC metric) {
     this.meansExpected = meansExpected;
     this.cycles = cycles;
+    this.metric = metric;
   }
 
   private float RandomWithinRange(float min, float max) {
@@ -63,6 +65,7 @@ public class KMeansStateClusterer {
   }
 
   //TODO : new class to contain the list of list of map of idx of children and heuristic score associated.
+  @Override
   public List<List<ClusteringResult>> generateClusters(List<GameState> gamestates, Function<GameState, List<Float>> heuristicFunction) {
     List<List<Float>> heuristicVectors = gamestates.stream().map(heuristicFunction).collect(Collectors.toList());
 
@@ -97,6 +100,11 @@ public class KMeansStateClusterer {
     }
 
     // Re-format the output:
+    return reformatIndicies(heuristicVectors, clusterIndices);
+
+  }
+
+  static List<List<ClusteringResult>> reformatIndicies(List<List<Float>> heuristicVectors, List<List<Integer>> clusterIndices) {
     List<List<ClusteringResult>> clusters = new ArrayList<>();
     for (List<Integer> li: clusterIndices)
     {
@@ -108,10 +116,7 @@ public class KMeansStateClusterer {
       }
       clusters.add(lcr);
     }
-
-
     return clusters;
-
   }
 
   private List<List<Float>> calculateClusterMeans(List<List<Integer>> clusters, List<List<Float>> vectors) {
@@ -146,7 +151,7 @@ public class KMeansStateClusterer {
       float closest = Integer.MAX_VALUE;
       int closestMeanIndex = -1;
       for (int j = 0; j < mean.size(); j++) {
-        float distance = findVectorDistance(mean.get(j), heuristicVectors.get(i));
+        float distance = findVectorDistance(mean.get(j), heuristicVectors.get(i), metric);
         if (distance < closest) {
           closest = distance;
           closestMeanIndex = j;
@@ -157,8 +162,9 @@ public class KMeansStateClusterer {
     return result;
   }
 
+
   //Borrowed from https://stackoverflow.com/questions/28428365/how-to-find-correlation-between-two-integer-arrays-in-java
-  public static float pearsonCorrelationDistance(List<Float> xs, List<Float> ys) {
+  static float pearsonCorrelationDistance(List<Float> xs, List<Float> ys) {
     double sx = 0.0;
     double sy = 0.0;
     double sxx = 0.0;
@@ -189,8 +195,7 @@ public class KMeansStateClusterer {
     return  1-(float)(cov / sigmax / sigmay);
   }
 
-
-  public static float eisenCosineCorrelationDistance(List<Float> vector1, List<Float> vector2) {
+  static float eisenCosineCorrelationDistance(List<Float> vector1, List<Float> vector2) {
     float top = 0;
     float xsq = 0;
     float ysq = 0;
@@ -202,11 +207,10 @@ public class KMeansStateClusterer {
     return 1.0f - ((float) (Math.abs(top) / Math.sqrt(xsq * ysq)));
   }
 
-  public static float findVectorDistance(List<Float> vector1, List<Float> vector2) {
-    int type = 0;
+  static float findVectorDistance(List<Float> vector1, List<Float> vector2, DISTANCE_METRIC metric) {
     float dist = 0;
 
-    switch (type) {
+    switch (metric.getKey()) {
       case 3:
         return pearsonCorrelationDistance(vector1, vector2);
       case 2:
@@ -229,8 +233,7 @@ public class KMeansStateClusterer {
     }
   }
 
-
-  public static void normaliseVectors(List<List<Float>> heuristicVectors, int vectorLength, List<Float> min, List<Float> max) {
+  static void normaliseVectors(List<List<Float>> heuristicVectors, int vectorLength, List<Float> min, List<Float> max) {
     for (int i = 0; i < vectorLength; i++) {
       float minVal = Integer.MAX_VALUE;
       float maxVal = Integer.MIN_VALUE;
@@ -261,4 +264,5 @@ public class KMeansStateClusterer {
       }
     }
   }
+
 }

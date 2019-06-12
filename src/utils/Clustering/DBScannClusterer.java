@@ -1,6 +1,7 @@
 package utils.Clustering;
 
 import core.ForwardModel;
+import core.GameState;
 import org.christopherfrantz.dbscan.DBSCANClusterer;
 import org.christopherfrantz.dbscan.DBSCANClusteringException;
 
@@ -11,15 +12,18 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+
 import static utils.Clustering.KMeansStateClusterer.findVectorDistance;
 import static utils.Clustering.KMeansStateClusterer.normaliseVectors;
+import static utils.Clustering.KMeansStateClusterer.reformatIndicies;
 
-public class DBScannClusterer {
+public class DBScannClusterer implements Clusterer{
   private final int maxElements;
   private final double maxDist;
+  private Clusterer.DISTANCE_METRIC metric;
 
-  private static double calculateDistance(VectorContainer x, VectorContainer b) {
-    return findVectorDistance(x.vector, b.vector);
+  private static double calculateDistance(VectorContainer x, VectorContainer b, Clusterer.DISTANCE_METRIC metric) {
+    return findVectorDistance(x.vector, b.vector,metric);
   }
 
   static class VectorContainer {
@@ -33,14 +37,15 @@ public class DBScannClusterer {
   }
 
 
-  public DBScannClusterer(int maxElements, double maxDist)  {
+  public DBScannClusterer(int maxElements, double maxDist,Clusterer.DISTANCE_METRIC metric)  {
     this.maxElements = maxElements;
     this.maxDist = maxDist;
 
+    this.metric = metric;
   }
 
-  public List<List<Integer>> generateClusters(ForwardModel[] gamestates, Function<ForwardModel, List<Float>> heuristicFunction) throws DBSCANClusteringException {
-    List<List<Float>> heuristicVectors = Arrays.stream(gamestates).map(heuristicFunction).collect(Collectors.toList());
+  public List<List<ClusteringResult>> generateClusters(List<GameState> gamestates, Function<GameState, List<Float>> heuristicFunction) {
+    List<List<Float>> heuristicVectors = gamestates.stream().map(heuristicFunction).collect(Collectors.toList());
     int vectorLength = heuristicVectors.get(0).size();
 
     List<Float> min = new ArrayList<>();
@@ -48,18 +53,25 @@ public class DBScannClusterer {
 
     normaliseVectors(heuristicVectors, vectorLength, min, max);
 
-    List<VectorContainer> containedVectors = IntStream.range(0, gamestates.length).mapToObj(idx-> new VectorContainer(idx,heuristicVectors.get(idx))).collect(Collectors.toList());
+    List<VectorContainer> containedVectors = IntStream.range(0, gamestates.size()).mapToObj(idx-> new VectorContainer(idx,heuristicVectors.get(idx))).collect(Collectors.toList());
 
-    DBSCANClusterer<VectorContainer> clusterer = new DBSCANClusterer<>(containedVectors,
-            maxElements,
-            maxDist,
-            DBScannClusterer::calculateDistance);
-    return clusterer.performClustering()
-            .stream()
-            .map(s->s.stream()
-                    .map(vc->vc.index)
-                    .collect(Collectors.toList()))
-            .collect(Collectors.toList());
-
+    DBSCANClusterer<VectorContainer> clusterer = null;
+    try {
+      clusterer = new DBSCANClusterer<>(containedVectors,
+              maxElements,
+              maxDist,(a,b)-> DBScannClusterer.calculateDistance(a,b,metric));
+      List<List<Integer>> clusterIndices = clusterer.performClustering()
+              .stream()
+              .map(s->s.stream()
+                      .map(vc->vc.index)
+                      .collect(Collectors.toList()))
+              .collect(Collectors.toList());
+      return reformatIndicies(heuristicVectors, clusterIndices);
+    } catch (DBSCANClusteringException e) {
+      e.printStackTrace();
+      throw new RuntimeException("Failed to dbscann");
+    }
   }
+
+
 }
