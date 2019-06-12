@@ -135,7 +135,7 @@ public class MCTSPlayer extends ParameterizedPlayer {
         //Determine the best action to take and return it.
         int action = m_root.mostVisitedAction();
 
-        checkEqualSamplers(m_root);
+        //checkEqualSamplers(m_root);
 
         // Make sure that we will re-use the tree at the next iteration:
         if(this.params.reuse_tree){
