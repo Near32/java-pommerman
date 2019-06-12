@@ -4,6 +4,9 @@ import core.GameState;
 import utils.Types;
 import utils.Vector2d;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class OurHeuristic extends StateHeuristic {
 
     private int increaseParam = 2;
@@ -90,3 +93,4 @@ public class OurHeuristic extends StateHeuristic {
         return value;
     }
 }
+

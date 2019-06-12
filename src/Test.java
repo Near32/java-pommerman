@@ -69,26 +69,40 @@ public class Test {
         List<Integer> lch = new ArrayList<Integer>();
         //lch.add(0);
         //lch.add(1);
-        lch.add(2);
-        //lch.add(3);
+        //lch.add(2);
+        lch.add(3);
+        //lch.add(4);
         CollapseMCTSParams.ClusteringHeuristicFunction = gs->
         {
             List<Float> ret = new ArrayList<>();
             for(int shk: lch)
             {
-                StateHeuristic sh;
-                if (shk == mctsParams.CUSTOM_HEURISTIC)
-                    sh = new CustomHeuristic(gs);
-                else if (shk == mctsParams.OUR_HEURISTIC)
-                    sh = new OurHeuristic();
-                else if (shk == mctsParams.ADVANCED_HEURISTIC) {
-                    Random rnd = new Random();
-                    sh = new AdvancedHeuristic(gs, rnd);
+                // 3
+                if (shk == mctsParams.MULTI_HEURISTIC_A) {
+                    MultiHeuristicA sh = new MultiHeuristicA();
+                    List<Double> values = sh.evaluateState(gs);
+                    for(int i=0;i<values.size();i++){
+                        double value = values.get(i);
+                        ret.add( (float) value);
+                    }
                 }
-                else
-                    sh = new PlayerCountHeuristic();
-                ret.add( (float) sh.evaluateState(gs)) ;
-                //ret.add( (float) Utils.sigmoid(sh.evaluateState(gs)) );
+                else {
+                    StateHeuristic sh;
+                    // 0
+                    if (shk == mctsParams.CUSTOM_HEURISTIC)
+                        sh = new CustomHeuristic(gs);
+                    // 1
+                    else if (shk == mctsParams.ADVANCED_HEURISTIC) {
+                        Random rnd = new Random();
+                        sh = new AdvancedHeuristic(gs, rnd);
+                    }
+                    // 2
+                    else if (shk == mctsParams.OUR_HEURISTIC)
+                        sh = new OurHeuristic();
+                    else
+                        sh = new PlayerCountHeuristic();
+                    ret.add((float) sh.evaluateState(gs));
+                }
             }
             return ret;
         };

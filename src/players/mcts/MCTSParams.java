@@ -25,7 +25,7 @@ public class MCTSParams implements ParameterSet {
     public final int CUSTOM_HEURISTIC = 0;
     public final int ADVANCED_HEURISTIC = 1;
     public final int OUR_HEURISTIC= 2;
-
+    public final int MULTI_HEURISTIC_A = 3;
     public double epsilon = 1e-6;
 
     // Collapsing-MCTS:
