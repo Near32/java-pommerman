@@ -17,16 +17,16 @@ public class KMeansStateClusterer {
   Integer cycles;
 
   public static void main(String[] args) throws Exception {
-    KMeansStateClusterer clusterer = new KMeansStateClusterer(2,4);
+    KMeansStateClusterer clusterer = new KMeansStateClusterer(2, 4);
     ForwardModel[] models = new ForwardModel[6];
-    for(int i = 0; i < models.length; i++) {
+    for (int i = 0; i < models.length; i++) {
       models[i] = new ForwardModel(true);
     }
 
-    List<List<Integer>> clusters = clusterer.generateClusters(models,model->{
+    List<List<Integer>> clusters = clusterer.generateClusters(models, model -> {
       List<Float> fake = new ArrayList<>();
-      for(int i = 0; i < 2; i++) {
-        fake.add(clusterer.RandomWithinRange(0,1));
+      for (int i = 0; i < 2; i++) {
+        fake.add(clusterer.RandomWithinRange(0, 1));
       }
       System.out.println("Generated Thing: " + printVector(fake));
 
@@ -34,19 +34,19 @@ public class KMeansStateClusterer {
     });
 
     System.out.println("Amount of clusters: " + clusters.size());
-    for(int i = 0; i < clusters.size(); i++ ) {
+    for (int i = 0; i < clusters.size(); i++) {
       System.out.println("Cluster " + i);
-        System.out.println("Generated Thing: " + printIntVector(clusters.get(i)));
-      
+      System.out.println("Generated Thing: " + printIntVector(clusters.get(i)));
+
     }
   }
 
   private static String printIntVector(List<Integer> integers) {
-    return String.join(",",integers.stream().map(Object::toString).collect(Collectors.toList()));
+    return String.join(",", integers.stream().map(Object::toString).collect(Collectors.toList()));
   }
 
   private static String printVector(List<Float> vector) {
-    return String.join(",",vector.stream().map(Object::toString).collect(Collectors.toList()));
+    return String.join(",", vector.stream().map(Object::toString).collect(Collectors.toList()));
   }
 
   public KMeansStateClusterer(Integer meansExpected, Integer cycles) {
@@ -137,13 +137,27 @@ public class KMeansStateClusterer {
   }
 
   public static float findVectorDistance(List<Float> vector1, List<Float> vector2) {
+    int type = 0;
     float dist = 0;
-    for (int i = 0; i < vector1.size(); i++) {
-      float diff = (vector1.get(i) - vector2.get(i));
-      dist += diff * diff;
+
+    switch (type) {
+      case 1:
+        //Manhattan distance
+        for (int i = 0; i < vector1.size(); i++) {
+          dist +=  Math.abs(vector1.get(i) - vector2.get(i));
+        }
+        return (dist);
+      case 0:
+      default:
+        //Euclidean distance
+        for (int i = 0; i < vector1.size(); i++) {
+          float diff = (vector1.get(i) - vector2.get(i));
+          dist += diff * diff;
+        }
+        return (float) Math.sqrt(dist);
     }
-    return (float) Math.sqrt(dist);
   }
+
 
   public static void normaliseVecors(List<List<Float>> heuristicVectors, int vectorLength, List<Float> min, List<Float> max) {
     for (int i = 0; i < vectorLength; i++) {
