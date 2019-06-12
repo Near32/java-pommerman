@@ -25,17 +25,11 @@ public class MCTSParams implements ParameterSet {
     public final int STOP_ITERATIONS = 1;
     public final int STOP_FMCALLS = 2;
 
-    public final int CUSTOM_HEURISTIC = 0;
-    public final int ADVANCED_HEURISTIC = 1;
-    public final int OUR_HEURISTIC= 3;
+    public static final int CUSTOM_HEURISTIC = 0;
+    public static final int ADVANCED_HEURISTIC = 1;
+    public static final int OUR_HEURISTIC= 3;
 
     public double epsilon = 1e-6;
-
-    public boolean collapsing = false;        // Whether we use Vanilla/Collapsing-MCTS.
-    public Function<GameState, List<Float>> ClusteringHeuristicFunction = null;
-    public int nbrUpdates2Uniform = 100;
-    public float maxClusterRatio = 0.25f;
-    public int nbrClustererCycles = 4;
 
     // Parameters
     public double K = Math.sqrt(2);

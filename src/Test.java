@@ -2,14 +2,11 @@ import core.Game;
 import core.GameState;
 import players.*;
 import players.heuristics.*;
-import players.mcts.LobsterParams;
-import players.mcts.LobsterPlayer;
+import players.mcts.*;
 
 import utils.Types;
 import players.rhea.utils.Constants;
 import objects.Avatar;
-import players.mcts.MCTSPlayer;
-import players.mcts.MCTSParams;
 import players.rhea.RHEAPlayer;
 import players.rhea.utils.RHEAParams;
 import players.rhea.RHEALobsterPlayer;
@@ -56,7 +53,7 @@ public class Test {
         OurMCTSParams.heuristic_method = mctsParams.OUR_HEURISTIC;
 
 
-        MCTSParams CollapseMCTSParams = new MCTSParams();
+        CollapsingMCTSParams CollapseMCTSParams = new CollapsingMCTSParams();
         CollapseMCTSParams.K = 10;//Math.sqrt(2);
         CollapseMCTSParams.rollout_depth = 6;
         CollapseMCTSParams.stop_type = mctsParams.STOP_ITERATIONS;

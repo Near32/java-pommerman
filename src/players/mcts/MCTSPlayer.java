@@ -1,6 +1,7 @@
 package players.mcts;
 
 import core.GameState;
+import players.mcts.nodes.SingleTreeNode;
 import players.optimisers.ParameterizedPlayer;
 import players.Player;
 import utils.ElapsedCpuTimer;
@@ -8,8 +9,6 @@ import utils.Types;
 import utils.ProbabilitySampler;
 
 import java.util.ArrayList;
-import java.util.Map;
-import java.util.HashMap;
 import java.util.Random;
 
 public class MCTSPlayer extends ParameterizedPlayer {
@@ -56,14 +55,6 @@ public class MCTSPlayer extends ParameterizedPlayer {
         for (Types.ACTIONS act : actionsList) {
             actions[i++] = act;
         }
-
-        if(this.params.collapsing)
-        {
-            // Reset the action sampling distribution to a uniform one.
-            Map<Integer, Float> weights = new HashMap<Integer,Float>(actions.length);
-            for(int ai=0;ai<=actions.length;ai++)  {   weights.put(ai, 1.0f);    }
-            this.tree_action_sampler = new ProbabilitySampler<Integer>(weights,this.params.nbrUpdates2Uniform);
-        }
     }
 
     /**
@@ -109,10 +100,7 @@ public class MCTSPlayer extends ParameterizedPlayer {
         m_root.setRootGameState(gs);
 
         //Determine the action using MCTS...
-        if(this.params.collapsing)
-            m_root.collapseMctsSearch(ect);
-        else
-            m_root.mctsSearch(ect);
+        search(m_root, ect);
 
         //Determine the best action to take and return it.
         int action = m_root.mostVisitedAction();
@@ -124,6 +112,10 @@ public class MCTSPlayer extends ParameterizedPlayer {
 
         //... and return it.
         return actions[action];
+    }
+
+    protected void search(SingleTreeNode root, ElapsedCpuTimer timer) {
+        root.mctsSearch(timer);
     }
 
     @Override

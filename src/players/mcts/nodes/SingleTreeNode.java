@@ -1,10 +1,11 @@
-package players.mcts;
+package players.mcts.nodes;
 
 import core.GameState;
 import players.heuristics.*;
 import players.heuristics.AdvancedHeuristic;
 import players.heuristics.CustomHeuristic;
 import players.heuristics.StateHeuristic;
+import players.mcts.MCTSParams;
 import utils.*;
 import utils.Clustering.ClusteringResult;
 
@@ -20,34 +21,26 @@ import utils.Clustering.KMeansStateClusterer;
 public class SingleTreeNode
 {
     /** Main members of the tree node */
-    private GameState rootState;                //Root state of the tree.
-    private GameState nodeState;                //State of the current node.
-    private SingleTreeNode parent;              //Parent of this node
-    private SingleTreeNode[] children;          //Children of this node.
-    private List<SingleTreeNode> representativeChildren;  //Representatives of clusters of children of this node.
-    private int[] children2ClusterIdx;          //For each child, the index of the cluster it is part of.
-    private double totValue;                    //Accumulated reward obtained from this node. Divide by nVisits to obtain Q(s,a)
-    private int nVisits;                        //Number of times this node has been visited.
-    private int m_depth;                        //Maximum depth (number of states ahead) reached on each iteration.
-    private int num_actions;                    //Number of available actions
-    private Types.ACTIONS[] actions;            //Array with all actions available
-    private StateHeuristic rootStateHeuristic;  //Heuristic to evaluate game states at the end of rollouts.
-
-    static private Function<GameState, List<Float>> ClusteringHeuristicFunction;
-    static private KMeansStateClusterer clusterer;      //Clusterer
-    private List<List<ClusteringResult>> clusters;      //Results of the clustering. Initialized at expansion time...
-    /** Sampler of actions, each action having a given weight affecting how much it is chosen during simulation roll-outs*/
-    private ProbabilitySampler<Integer> actionSampler;
+    protected GameState rootState;                //Root state of the tree.
+    protected GameState nodeState;                //State of the current node.
+    protected SingleTreeNode parent;              //Parent of this node
+    protected SingleTreeNode[] children;          //Children of this node.
+    protected double totValue;                    //Accumulated reward obtained from this node. Divide by nVisits to obtain Q(s,a)
+    protected int nVisits;                        //Number of times this node has been visited.
+    protected int m_depth;                        //Maximum depth (number of states ahead) reached on each iteration.
+    protected int num_actions;                    //Number of available actions
+    protected Types.ACTIONS[] actions;            //Array with all actions available
+    protected StateHeuristic rootStateHeuristic;  //Heuristic to evaluate game states at the end of rollouts.
 
     /** Other auxiliary members */
-
+;
     //Running bounds: keep track of the highest and lowest rewards ever seen in the game. Used for normalizing Q(s,a)
-    private double[] bounds = new double[]{Double.MAX_VALUE, -Double.MAX_VALUE};
+    protected double[] bounds = new double[]{Double.MAX_VALUE, -Double.MAX_VALUE};
     public MCTSParams params;                   //Parameters set for MCTS
 
-    private int childIdx;                       //Index of this child in the parent's array of children
-    private int fmCallsCount;                   //Keeps a count on the number of usages of the forward model (used for termination condition)
-    private Random m_rnd;                       //Random object for random choosing. Same object to depend only on one seed
+    protected int childIdx;                       //Index of this child in the parent's array of children
+    protected int fmCallsCount;                   //Keeps a count on the number of usages of the forward model (used for termination condition)
+    protected Random m_rnd;                       //Random object for random choosing. Same object to depend only on one seed
 
 
 
@@ -75,8 +68,6 @@ public class SingleTreeNode
         this.num_actions = num_actions;
         this.actions = actions;
         children = new SingleTreeNode[num_actions];
-        this.representativeChildren = null;
-        children2ClusterIdx = new int[num_actions];
         totValue = 0.0;
         this.childIdx = childIdx;
         if(parent != null) {
@@ -85,10 +76,7 @@ public class SingleTreeNode
         }
         else {
             m_depth = 0;
-            this.ClusteringHeuristicFunction = p.ClusteringHeuristicFunction;
         }
-        this.clusterer = new KMeansStateClusterer( (int)(this.params.maxClusterRatio*this.num_actions), this.params.nbrClustererCycles );
-        this.actionSampler = actionSampler;
     }
 
     //Constructor of the MCTS node class.
@@ -109,11 +97,11 @@ public class SingleTreeNode
         this.rootState = gs;
         if(this.parent == null)
             this.nodeState = gs.copy();
-        if (params.heuristic_method == params.CUSTOM_HEURISTIC)
+        if (params.heuristic_method == MCTSParams.CUSTOM_HEURISTIC)
             this.rootStateHeuristic = new CustomHeuristic(gs);
-        else if (params.heuristic_method == params.OUR_HEURISTIC) // New method: combined heuristics
+        else if (params.heuristic_method == MCTSParams.OUR_HEURISTIC) // New method: combined heuristics
             this.rootStateHeuristic = new OurHeuristic();
-        else if (params.heuristic_method == params.ADVANCED_HEURISTIC) // New method: combined heuristics
+        else if (params.heuristic_method == MCTSParams.ADVANCED_HEURISTIC) // New method: combined heuristics
             this.rootStateHeuristic = new AdvancedHeuristic(gs, m_rnd);
     }
 
@@ -171,50 +159,6 @@ public class SingleTreeNode
     }
 
     /**
-     * Main entry point of the algorithm. Runs Collapse-MCTS until budget is exhausted. Budget is determined by the MCTSParams
-     * variable of this class.
-     * @param elapsedTimer In case budget is expressed in time, elapsedTimer includes the time remaining until this
-     *                     time is exhausted.
-     */
-    void collapseMctsSearch(ElapsedCpuTimer elapsedTimer) {
-
-        //Some auxiliary variables to manage different budget expirations
-        long remaining;
-        int numIters = 0;
-        int remainingLimit = 2; //Safe time threshold for time budget.
-
-        //Run Collapse-MCTS in a loop until termination condition.
-        boolean stop = false;
-        while(!stop){
-
-            //Start from a copy of the game state
-            GameState state = rootState.copy();
-
-            //1. Selection and 2. Expansion are executed in treePolicy(state)
-            SingleTreeNode selected = collapseTreePolicy(state);
-            //3. Simulation - rollout
-            double delta = selected.rollOut(state);
-            //4. Back-propagation
-            backUp(selected, delta);
-
-            //Stopping condition: it can be time, number of iterations or uses of the forward model.
-            //For each case, update counts to determine if we must stop.
-            if(params.stop_type == params.STOP_TIME) {
-                remaining = elapsedTimer.remainingTimeMillis();
-                stop = remaining <= remainingLimit;
-            }else if(params.stop_type == params.STOP_ITERATIONS) {
-                numIters++;
-                stop = numIters >= params.num_iterations;
-            }else if(params.stop_type == params.STOP_FMCALLS)
-            {
-                fmCallsCount+=params.rollout_depth;
-                stop = (fmCallsCount + params.rollout_depth) > params.num_fmcalls;
-            }
-        }
-
-    }
-
-    /**
      * Performs the tree policy. Navigates down the tree selecting nodes using UCT, until a not-fully expanded
      * node is reach. Then, it starts the call to expand it.
      * @param state Current state to do the policy from.
@@ -244,48 +188,10 @@ public class SingleTreeNode
     }
 
     /**
-     * Performs the tree policy of Collapse-MCTS.
-     * Navigates down the tree selecting nodes using UCT, until a not-fully expanded
-     * node is reach. Then, it starts the call to expand it.
-     * @param state Current state to do the policy from.
-     * @return the expanded node.
-     */
-    private SingleTreeNode collapseTreePolicy(GameState state) {
-
-        //'cur': our current node in the tree.
-        SingleTreeNode cur = this;
-
-        //We keep going down the tree as long as the game is not over and we haven't reached the maximum depth
-        while (!state.isTerminal() && cur.m_depth < params.rollout_depth)
-        {
-            //If not fully expanded, expand this one.
-            if (cur.notFullyExpanded()) {
-                // expand it all:
-                SingleTreeNode[] expandedChildren = cur.expandAll(state);
-                // compute clusters,
-                // based on the similarity of the vectors
-                // of heuristic scores:
-                cur.computeClusters(expandedChildren);
-                // update the action sampling distribution:
-                cur.updateActionSamplingDistribution();
-                // select the cluster representative according to uct:
-                return cur.uctOnRepresentatives(state);
-
-            } else {
-                //If fully expanded, apply UCT to pick one of the children of 'cur'
-                cur = cur.uctOnRepresentatives(state);
-            }
-        }
-
-        //This one is the node to start the rollout from.
-        return cur;
-    }
-
-    /**
      * Checks if this node is not fully expanded. If any of my children is null, then it's not fully expanded.
      * @return true if the node is not fully expanded.
      */
-    private boolean notFullyExpanded() {
+    protected boolean notFullyExpanded() {
         for (SingleTreeNode tn : children) {
             if (tn == null) {
                 return true;
@@ -300,7 +206,7 @@ public class SingleTreeNode
      * @param state Game state *before* the expansion happens (i.e. parent node that is not fully expanded).
      * @return The newly expande tree node.
      */
-    private SingleTreeNode expand(GameState state) {
+    protected SingleTreeNode expand(GameState state) {
 
         //Go through all the not-expanded children of this node and pick one at random.
         int bestAction = 0;
@@ -347,64 +253,6 @@ public class SingleTreeNode
             children[i] = tn;
         }
         return children;
-    }
-
-    /**
-     * Compute the clusters for the Collapse-MCTS iteration of the expansion part.
-     * @param expandedChildren SingleTreeNode[] that have just been expanded from their parent node.
-     */
-    private void computeClusters(SingleTreeNode[] expandedChildren)
-    {
-        List<GameState> gss = Arrays.stream(expandedChildren).map(child->child.nodeState).collect(Collectors.toList());
-
-        // Initialization of the clusters for this SingleTreeNode:
-        this.clusters = clusterer.generateClusters(gss, ClusteringHeuristicFunction);
-
-        int nbrCluster = clusters.size();
-        this.representativeChildren = new ArrayList<>();
-        int countCluster = 0;
-        // Initialise the array telling which cluster each child belongs to
-        children2ClusterIdx = new int[children.length];
-        for(int idxCluster = 0; idxCluster < clusters.size(); idxCluster++)
-        {
-            List<ClusteringResult> cluster = clusters.get(idxCluster);
-            if(cluster.size() > 0)
-            {
-                List<Float> norms = new ArrayList<Float>();
-                for (int i = 0; i < cluster.size(); i++) {
-                    // Get the absolute index of the child that's in the cluster, and set it in children2ClusterIdx
-                    children2ClusterIdx[cluster.get(i).getNodeIdx()] = idxCluster;
-                    norms.add(euclidianNorm(cluster.get(i).getHeuristicScores()));
-                }
-                // Find the greatest:
-                int idxReprInCluster = maxIndexInVector(norms);
-                // Make the representative child of the cluster be the node
-                // that scores the highest in terms of the chosen norm over
-                // the heuristic vector:
-                int idxReprInChildren = cluster.get(idxReprInCluster).getNodeIdx();
-                SingleTreeNode repr = this.children[idxReprInChildren];
-                this.representativeChildren.add(repr);
-            }
-        }
-    }
-
-    private void updateActionSamplingDistribution()
-    {
-        Float thisEuclidianNormHeuristicScore = euclidianNorm( ClusteringHeuristicFunction.apply(this.nodeState));
-        Map<Integer, Float> new_weights = new HashMap<>(num_actions);
-        for(int idxCluster=0;idxCluster<this.clusters.size();idxCluster++)
-        {
-            List<ClusteringResult> lcr = this.clusters.get(idxCluster);
-            for(ClusteringResult cr: lcr)
-            {
-                // Update towards good and novel states:
-                Integer actionIdx = cr.getNodeIdx();
-                Float novelty = euclidianNorm(cr.getHeuristicScores()) - thisEuclidianNormHeuristicScore;
-                Float new_action_sampling_unnorm_weight= novelty;
-                new_weights.put(actionIdx, new_action_sampling_unnorm_weight);
-            }
-        }
-        actionSampler.updateWeights(new_weights);
     }
 
     /**
@@ -491,58 +339,11 @@ public class SingleTreeNode
     }
 
     /**
-     * Performs UCT in a node. Selects the action to follow during the tree policy.
-     * @param state
-     * @return
-     */
-    private SingleTreeNode uctOnRepresentatives(GameState state) {
-
-        //We'll pick the action with the highest UCB1 value.
-        SingleTreeNode selected = null;
-        double bestValue = -Double.MAX_VALUE;
-        for (SingleTreeNode representative : this.representativeChildren)
-        {
-            //For each representative, calculate the different parts. First, exploitation:
-            double hvVal = representative.totValue;
-            double reprValue =  hvVal / (representative.nVisits + params.epsilon);  //Use epsilon to avoid /0.
-
-            //Normalize rewards between 0 and 1 for the exploitation term (allows use of sqrt(2) as balance constant K
-            double exploit = reprValue = Utils.normalise(reprValue, bounds[0], bounds[1]);
-            double explore = Math.sqrt(Math.log(this.nVisits + 1) / (representative.nVisits + params.epsilon)); //Note we can use representative.nVisits for N(s,a)
-
-            //UCB1!
-            double uctValue = exploit + params.K * explore;
-
-            //Little trick: in case there are ties of values, add some little random noise to it to break ties
-            uctValue = Utils.noise(uctValue, params.epsilon, this.m_rnd.nextDouble());
-
-            // keep the best one.
-            if (uctValue > bestValue) {
-                selected = representative;
-                bestValue = uctValue;
-            }
-        }
-
-        if (selected == null)
-        {
-            //This would be odd, but can happen if we reach a tree with no children. That probable means ERROR.
-            throw new RuntimeException("Warning! returning null: " + bestValue + " : " + this.representativeChildren.size() + " " +
-                    + bounds[0] + " " + bounds[1]);
-        }
-
-        //We need to roll the state, using the Forward Model, to keep going down the tree.
-        roll(state, actions[selected.childIdx]);
-
-        //Return the selected node to continue the Selection phase.
-        return selected;
-    }
-
-    /**
      * Performs the default policy (random rollout).
      * @param state State where the rollout starts.
      * @return Returns the value of the state found at the end of the rollout.
      */
-    private double rollOut(GameState state)
+    protected double rollOut(GameState state)
     {
         //Keep track of the current depth - we won't be creating nodes here.
         int thisDepth = this.m_depth;
@@ -634,7 +435,7 @@ public class SingleTreeNode
      * @param node Node to start backup from. This node should be the one expanded in this iteration.
      * @param result Reward to back-propagate
      */
-    private void backUp(SingleTreeNode node, double result)
+    protected void backUp(SingleTreeNode node, double result)
     {
         SingleTreeNode n = node;
 
@@ -749,44 +550,6 @@ public class SingleTreeNode
         }
 
         return selected;
-    }
-
-    /**
-     * Compute the euclidian norm (vector :--> float value) of a List<Float>.
-     * @return float normValue.
-     */
-    private static float euclidianNorm(List<Float> vector)
-    {
-        float squared_sum= 0;
-        for (Float aFloat : vector) {
-            squared_sum += aFloat * aFloat;
-        }
-        return (float) Math.sqrt(squared_sum);
-    }
-
-    /**
-     * Finds the maximal value in an array and return the index.
-     * @return int Idx of max value in array.
-     */
-    private static int maxIndexInVector(List<Float> vector)
-    {
-        if(vector == null || vector.size() < 1 )
-        {
-            throw new IllegalArgumentException("Cannot find max index in an null/empty array.");
-        }
-
-        int maxIdx=0;
-        float maxValue = vector.get(0);
-        for(int i=0; i<vector.size(); i++)
-        {
-            float vi = vector.get(i);
-            if( vi > maxValue)
-            {
-                maxValue = vi;
-                maxIdx = i;
-            }
-        }
-        return maxIdx;
     }
 
 }
