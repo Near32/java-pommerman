@@ -96,7 +96,13 @@ public class KMeansStateClusterer implements Clusterer {
       // Compute the cluster, one time.
       clusterIndices = generateClusters(mean, heuristicVectors);
       // re-evaluate the barycentres of each cluster:
+      List<List<Float>> oldMean  = mean;
       mean = calculateClusterMeans(clusterIndices, heuristicVectors);
+      for(int j = 0; j < mean.size(); j++) {
+        if(clusterIndices.get(j).size() ==0) {
+          mean.set(j,oldMean.get(j));
+        }
+      }
     }
 
     // Re-format the output:
