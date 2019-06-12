@@ -148,7 +148,7 @@ public class KMeansStateClusterer implements Clusterer {
     }
 
     for (int i = 0; i < heuristicVectors.size(); i++) {
-      float closest = Integer.MAX_VALUE;
+      float closest = Float.MAX_VALUE;
       int closestMeanIndex = -1;
       for (int j = 0; j < mean.size(); j++) {
         float distance = findVectorDistance(mean.get(j), heuristicVectors.get(i), metric);
@@ -191,6 +191,9 @@ public class KMeansStateClusterer implements Clusterer {
     // standard error of y
     double sigmay = Math.sqrt(syy / n -  sy * sy / n / n);
 
+    if(sigmax == 0 || sigmay == 0)
+      return 0;
+
     // correlation is just a normalized covariation
     return  1-(float)(cov / sigmax / sigmay);
   }
@@ -204,6 +207,10 @@ public class KMeansStateClusterer implements Clusterer {
       xsq += Math.pow(vector1.get(i), 2);
       ysq += Math.pow(vector2.get(i), 2);
     }
+
+    if(xsq == 0 || ysq == 0)
+      return 1.0f;
+
     return 1.0f - ((float) (Math.abs(top) / Math.sqrt(xsq * ysq)));
   }
 
