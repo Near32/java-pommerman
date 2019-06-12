@@ -66,6 +66,11 @@ public class MCTSParams implements ParameterSet {
             case "maxClusterRatio": maxClusterRatio = (float) value; break;
             case "nbrClustererCycles": nbrClustererCycles = (int) value; break;
             case "globalActionDistribution": globalActionDistribution = (boolean) value; break;
+
+            case "useDBScan": useDBScan = (boolean)value;break;
+            case "distanceMeasure": distanceMeasure = Clusterer.DISTANCE_METRIC.fromInt((int)value);break;
+            case "DBSscanMaxElements": DBSscanMaxElements = (int)value;break;
+            case "DBSscanMaxDist": DBSscanMaxDist = (float)value;break;
         }
     }
 
@@ -82,7 +87,13 @@ public class MCTSParams implements ParameterSet {
             case "nbrUpdates2Uniform": return nbrUpdates2Uniform;
             case "maxClusterRatio": return maxClusterRatio;
             case "nbrClustererCycles": return nbrClustererCycles;
+
             case "globalActionDistribution": return globalActionDistribution;
+
+            case "useDBScan": return useDBScan;
+            case "distanceMeasure":return  distanceMeasure.getKey();
+            case "DBSscanMaxElements":return DBSscanMaxElements;
+            case "DBSscanMaxDist":return DBSscanMaxDist;
         }
         return null;
     }
@@ -100,6 +111,11 @@ public class MCTSParams implements ParameterSet {
         paramList.add("maxClusterRatio");
         paramList.add("nbrClustererCycles");
         paramList.add("globalActionDistribution");
+
+        paramList.add("useDBScan");
+        paramList.add("distanceMeasure");
+        paramList.add("DBSscanMaxElements");
+        paramList.add("DBSscanMaxDist");
         return paramList;
     }
 
@@ -139,6 +155,11 @@ public class MCTSParams implements ParameterSet {
         parameterValues.put("maxClusterRatio", new Float[] {0.1f, 0.25f, 0.4f, 0.6f});
         parameterValues.put("nbrClustererCycles", new Integer[] {1, 4, 8});
         parameterValues.put("globalActionDistribution", new Boolean[] {true, false});
+
+        parameterValues.put("useDBScan", new Boolean[] {true, false});
+        parameterValues.put("distanceMeasure", new Integer[] {0,1,2,3});
+        parameterValues.put("DBSscanMaxElements", new Integer[] {4,8,10,12});
+        parameterValues.put("DBSscanMaxDist", new Float[] {0.4f,.8f,1.2f,1.6f});
 
         return parameterValues;
     }
