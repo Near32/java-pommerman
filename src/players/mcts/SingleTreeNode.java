@@ -6,12 +6,14 @@ import players.heuristics.AdvancedHeuristic;
 import players.heuristics.CustomHeuristic;
 import players.heuristics.StateHeuristic;
 import utils.*;
+import utils.Clustering.Clusterer;
 import utils.Clustering.ClusteringResult;
 
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import utils.Clustering.DBScannClusterer;
 import utils.Clustering.KMeansStateClusterer;
 
 /**
@@ -35,10 +37,10 @@ public class SingleTreeNode
     private StateHeuristic rootStateHeuristic;  //Heuristic to evaluate game states at the end of rollouts.
 
     static private Function<GameState, List<Float>> ClusteringHeuristicFunction;
-    static private KMeansStateClusterer clusterer;      //Clusterer
+    static private Clusterer clusterer;      //Clusterer
     private List<List<ClusteringResult>> clusters;      //Results of the clustering. Initialized at expansion time...
     /** Sampler of actions, each action having a given weight affecting how much it is chosen during simulation roll-outs*/
-    private ProbabilitySampler<Integer> actionSampler;
+    public ProbabilitySampler<Integer> actionSampler;
 
     /** Other auxiliary members */
 
@@ -89,7 +91,13 @@ public class SingleTreeNode
             m_depth = 0;
             this.ClusteringHeuristicFunction = p.ClusteringHeuristicFunction;
         }
-        this.clusterer = new KMeansStateClusterer( (int)(this.params.maxClusterRatio*this.num_actions), this.params.nbrClustererCycles );
+        this.clusterer = new KMeansStateClusterer((int) (this.params.maxClusterRatio * this.num_actions), this.params.nbrClustererCycles, this.params.distanceMeasure);
+
+        if(this.params.useDBScan) {
+            this.clusterer = new DBScannClusterer(this.params.DBSscanMaxElements, this.params.DBSscanMaxDist, this.params.distanceMeasure,this.clusterer );
+        }
+        else {
+        }
         this.actionSampler = actionSampler;
     }
 
@@ -179,7 +187,6 @@ public class SingleTreeNode
      *                     time is exhausted.
      */
     void collapseMctsSearch(ElapsedCpuTimer elapsedTimer) {
-
         //Some auxiliary variables to manage different budget expirations
         long remaining;
         int numIters = 0;
