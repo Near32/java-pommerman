@@ -92,8 +92,8 @@ public class MCTSParams implements ParameterSet {
 
             case "useDBScan": return useDBScan;
             case "distanceMeasure":return  distanceMeasure.getKey();
-//            case "DBSscanMaxElements":return DBSscanMaxElements;
-//            case "DBSscanMaxDist":return DBSscanMaxDist;
+            case "DBSscanMaxElements":return DBSscanMaxElements;
+            case "DBSscanMaxDist":return DBSscanMaxDist;
         }
         return null;
     }
@@ -114,8 +114,8 @@ public class MCTSParams implements ParameterSet {
 
         paramList.add("useDBScan");
         paramList.add("distanceMeasure");
-//        paramList.add("DBSscanMaxElements");
-//        paramList.add("DBSscanMaxDist");
+        paramList.add("DBSscanMaxElements");
+        paramList.add("DBSscanMaxDist");
         return paramList;
     }
 
@@ -164,8 +164,8 @@ public class MCTSParams implements ParameterSet {
 
         parameterValues.put("useDBScan", new Boolean[] {false});
         parameterValues.put("distanceMeasure", new Integer[] {0,1,2,3});
-//        parameterValues.put("DBSscanMaxElements", new Integer[] {4,8,10,12});
-//        parameterValues.put("DBSscanMaxDist", new Float[] {0.1f,0.2f,0.4f,0.6f});
+        parameterValues.put("DBSscanMaxElements", new Integer[] {4,8,10,12});
+        parameterValues.put("DBSscanMaxDist", new Float[] {0.1f,0.2f,0.4f,0.6f});
 
         return parameterValues;
     }
