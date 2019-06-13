@@ -54,7 +54,7 @@ public class RunNTBEA {
         model.useNTuple = true;
         ntbea.setModel(model);
 
-        int nEvals = 50;
+        int nEvals = 1000;
         int[] solution = ntbea.runTrial(problem, nEvals);
 
 //        System.out.println("Report: ");

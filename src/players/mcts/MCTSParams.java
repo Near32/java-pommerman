@@ -92,8 +92,8 @@ public class MCTSParams implements ParameterSet {
 
             case "useDBScan": return useDBScan;
             case "distanceMeasure":return  distanceMeasure.getKey();
-            case "DBSscanMaxElements":return DBSscanMaxElements;
-            case "DBSscanMaxDist":return DBSscanMaxDist;
+//            case "DBSscanMaxElements":return DBSscanMaxElements;
+//            case "DBSscanMaxDist":return DBSscanMaxDist;
         }
         return null;
     }
@@ -114,8 +114,8 @@ public class MCTSParams implements ParameterSet {
 
         paramList.add("useDBScan");
         paramList.add("distanceMeasure");
-        paramList.add("DBSscanMaxElements");
-        paramList.add("DBSscanMaxDist");
+//        paramList.add("DBSscanMaxElements");
+//        paramList.add("DBSscanMaxDist");
         return paramList;
     }
 
@@ -125,7 +125,7 @@ public class MCTSParams implements ParameterSet {
         clusterHeuristics.add(gs->
         {
             List<Float> ret = new ArrayList<>();
-            for(int shk: new Integer[] {0, 1, 2, 3})
+            for(int shk: new Integer[] {0, 1, 2, 3, 4})
             {
                 StateHeuristic sh;
                 if (shk == this.CUSTOM_HEURISTIC)
@@ -135,6 +135,12 @@ public class MCTSParams implements ParameterSet {
                 else if (shk == this.ADVANCED_HEURISTIC) {
                     Random rnd = new Random();
                     sh = new AdvancedHeuristic(gs, rnd);
+                }
+                else if (shk == this.MULTI_HEURISTIC_A) {
+                    MultiHeuristicA multi = new MultiHeuristicA();
+                    for(Double d : multi.evaluateState(gs))
+                        ret.add(d.floatValue());
+                    continue;
                 }
                 else
                     sh = new PlayerCountHeuristic();
@@ -156,10 +162,10 @@ public class MCTSParams implements ParameterSet {
         parameterValues.put("nbrClustererCycles", new Integer[] {1, 4, 8});
         parameterValues.put("globalActionDistribution", new Boolean[] {true, false});
 
-        parameterValues.put("useDBScan", new Boolean[] {true, false});
+        parameterValues.put("useDBScan", new Boolean[] {false});
         parameterValues.put("distanceMeasure", new Integer[] {0,1,2,3});
-        parameterValues.put("DBSscanMaxElements", new Integer[] {4,8,10,12});
-        parameterValues.put("DBSscanMaxDist", new Float[] {0.1f,0.2f,0.4f,0.6f});
+//        parameterValues.put("DBSscanMaxElements", new Integer[] {4,8,10,12});
+//        parameterValues.put("DBSscanMaxDist", new Float[] {0.1f,0.2f,0.4f,0.6f});
 
         return parameterValues;
     }
@@ -177,7 +183,7 @@ public class MCTSParams implements ParameterSet {
     @Override
     public Map<String, String[]> constantNames() {
         HashMap<String, String[]> names = new HashMap<>();
-        names.put("heuristic_method", new String[]{"CUSTOM_HEURISTIC", "ADVANCED_HEURISTIC", "OUR_HEURISTIC"});
+        names.put("heuristic_method", new String[]{"CUSTOM_HEURISTIC", "ADVANCED_HEURISTIC", "OUR_HEURISTIC", "MULTI_HEURISTIC"});
         return names;
     }
 }
