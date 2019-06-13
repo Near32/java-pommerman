@@ -141,15 +141,15 @@ public class MCTSParams implements ParameterSet {
 
         parameterValues.put("collapsing", new Boolean[] {true});
         parameterValues.put("ClusteringHeuristicFunction", clusterHeuristics.toArray());
-        parameterValues.put("nbrUpdates2Uniform", new Integer[] {50, 100, 200});
-        parameterValues.put("maxClusterRatio", new Float[] {0.1f, 0.25f, 0.4f, 0.6f});
-        parameterValues.put("nbrClustererCycles", new Integer[] {1, 4, 8});
+        parameterValues.put("nbrUpdates2Uniform", new Integer[] {30,50, 100});
+        parameterValues.put("maxClusterRatio", new Float[] {0.1f});
+        parameterValues.put("nbrClustererCycles", new Integer[] {1});
         parameterValues.put("globalActionDistribution", new Boolean[] {true, false});
 
-        parameterValues.put("useDBScan", new Boolean[] {true, false});
+        parameterValues.put("useDBScan", new Boolean[] {true});
         parameterValues.put("distanceMeasure", new Integer[] {0,1,2,3});
-        parameterValues.put("DBSscanMaxElements", new Integer[] {4,8,10,12});
-        parameterValues.put("DBSscanMaxDist", new Float[] {0.1f,0.2f,0.4f,0.6f});
+        parameterValues.put("DBSscanMaxElements", new Integer[] {6,8,10,12});
+        parameterValues.put("DBSscanMaxDist", new Float[] {.6f,.8f,1.0f,1.2f});
 
         return parameterValues;
     }
