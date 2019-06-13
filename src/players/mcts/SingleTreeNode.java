@@ -666,7 +666,7 @@ public class SingleTreeNode
 
         //For all actions
         int removedActions = 0;
-        while(actionsToTry.size() > 0 || removedActions == mask.size()) {
+        while(actionsToTry.size() > 0 || (mask != null && removedActions == mask.size())) {
 
             //See where would this take me.
             int nAction;
