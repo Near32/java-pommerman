@@ -1,5 +1,6 @@
 import core.Game;
 import players.*;
+import players.heuristics.*;
 import players.mcts.MCTSParams;
 import players.mcts.MCTSPlayer;
 import players.mcts.LobsterPlayer;
@@ -10,6 +11,7 @@ import players.rhea.RHEAPlayer;
 import players.rhea.utils.Constants;
 import players.rhea.utils.RHEAParams;
 import utils.*;
+import utils.Clustering.Clusterer;
 
 import java.util.*;
 
@@ -102,8 +104,10 @@ public class Run {
                         playerStr[i-3] = "OSLA";
                         break;
                     case 3:
-                        p = new SimplePlayer(seed, playerID++);
-                        playerStr[i-3] = "SimplePlayer";
+                        //p = new SimplePlayer(seed, playerID++);
+                        //playerStr[i-3] = "SimplePlayer";
+                        p = new SimpleEvoAgent(seed, playerID++);
+                        playerStr[i-3] = "SimpleEvoAgent";
                         break;
                     case 4:
                         rheaParams.heurisic_type = Constants.CUSTOM_HEURISTIC;
@@ -122,6 +126,7 @@ public class Run {
                         break;
                     case 7:
                         mctsParams.heuristic_method = mctsParams.ADVANCED_HEURISTIC;//mctsParams.ADVANCED_HEURISTIC;
+                        mctsParams.collapsing = false;
                         p = new MCTSPlayer(seed, playerID++, mctsParams);
                         playerStr[i-3] = "MCTS-ADVANCED";
                         break;
@@ -134,6 +139,88 @@ public class Run {
                     case 9:
                         p = new RHEALobsterPlayer(seed, playerID++, RHEAlobsterParams);
                         playerStr[i-3] = "RHEA LOBSTER";
+                        break;
+                    case 10:
+                        // KMeans player
+                        mctsParams.heuristic_method = mctsParams.ADVANCED_HEURISTIC;
+                        mctsParams.collapsing = true;
+                        mctsParams.ClusteringHeuristicFunction = gs->
+                        {
+                            List<Float> ret = new ArrayList<>();
+                            for (int shk : new Integer[]{0, 1, 2, 3, 4}) {
+                                StateHeuristic sh;
+                                if (shk == mctsParams.CUSTOM_HEURISTIC)
+                                    sh = new CustomHeuristic(gs);
+                                else if (shk == mctsParams.OUR_HEURISTIC)
+                                    sh = new OurHeuristic();
+                                else if (shk == mctsParams.ADVANCED_HEURISTIC) {
+                                    Random rnd = new Random();
+                                    sh = new AdvancedHeuristic(gs, rnd);
+                                } else if (shk == mctsParams.MULTI_HEURISTIC_A) {
+                                    MultiHeuristicA multi = new MultiHeuristicA();
+                                    for (Double d : multi.evaluateState(gs))
+                                        ret.add(d.floatValue());
+                                    continue;
+                                } else
+                                    sh = new PlayerCountHeuristic();
+
+                                ret.add((float) sh.evaluateState(gs));
+                            }
+                            return ret;
+                        };
+                        mctsParams.nbrUpdates2Uniform = 100;
+                        mctsParams.nbrClustererCycles = 1;
+                        mctsParams.useDBScan = false;
+                        mctsParams.maxClusterRatio = 0.6f;
+                        mctsParams.rollout_depth = 10;
+                        mctsParams.globalActionDistribution = true;
+                        mctsParams.K = 1.0f;
+                        mctsParams.distanceMeasure = Clusterer.DISTANCE_METRIC.Manhattan;
+
+                        p = new MCTSPlayer(seed, playerID++, mctsParams);
+                        playerStr[i-3] = "MCTS-KMeans";
+                        break;
+                    case 11:
+                        // DBScan player
+                        mctsParams.heuristic_method = mctsParams.ADVANCED_HEURISTIC;
+                        mctsParams.collapsing = true;
+                        mctsParams.ClusteringHeuristicFunction = gs->
+                        {
+                            List<Float> ret = new ArrayList<>();
+                            for (int shk : new Integer[]{0, 1, 2, 3, 4}) {
+                                StateHeuristic sh;
+                                if (shk == mctsParams.CUSTOM_HEURISTIC)
+                                    sh = new CustomHeuristic(gs);
+                                else if (shk == mctsParams.OUR_HEURISTIC)
+                                    sh = new OurHeuristic();
+                                else if (shk == mctsParams.ADVANCED_HEURISTIC) {
+                                    Random rnd = new Random();
+                                    sh = new AdvancedHeuristic(gs, rnd);
+                                } else if (shk == mctsParams.MULTI_HEURISTIC_A) {
+                                    MultiHeuristicA multi = new MultiHeuristicA();
+                                    for (Double d : multi.evaluateState(gs))
+                                        ret.add(d.floatValue());
+                                    continue;
+                                } else
+                                    sh = new PlayerCountHeuristic();
+
+                                ret.add((float) sh.evaluateState(gs));
+                            }
+                            return ret;
+                        };
+                        mctsParams.nbrUpdates2Uniform = 50;
+                        mctsParams.nbrClustererCycles = 1;
+                        mctsParams.useDBScan = true;
+                        mctsParams.maxClusterRatio = 0.1f;
+                        mctsParams.rollout_depth = 15;
+                        mctsParams.globalActionDistribution = true;
+                        mctsParams.K = 1.4142f;
+                        mctsParams.distanceMeasure = Clusterer.DISTANCE_METRIC.Manhattan;
+                        mctsParams.DBSscanMaxElements = 6;
+                        mctsParams.DBSscanMaxDist = 0.8;
+
+                        p = new MCTSPlayer(seed, playerID++, mctsParams);
+                        playerStr[i-3] = "MCTS-DBScan";
                         break;
                     default:
                         System.out.println("WARNING: Invalid agent ID: " + agentType );
