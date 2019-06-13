@@ -125,6 +125,8 @@ public class SingleTreeNode
             this.rootStateHeuristic = new OurHeuristic();
         else if (params.heuristic_method == params.ADVANCED_HEURISTIC) // New method: combined heuristics
             this.rootStateHeuristic = new AdvancedHeuristic(gs, m_rnd);
+        //else if (params.heuristic_method == params.MULTI_HEURISTIC_A)
+        //    this.rootStateHeuristic = new MultiHeuristicA();
     }
 
     public SingleTreeNode getChild(Integer idx)
@@ -663,7 +665,8 @@ public class SingleTreeNode
         int height = board[0].length;
 
         //For all actions
-        while(actionsToTry.size() > 0) {
+        int removedActions = 0;
+        while(actionsToTry.size() > 0 || (mask != null && removedActions == mask.size())) {
 
             //See where would this take me.
             int nAction;
@@ -692,6 +695,7 @@ public class SingleTreeNode
             else {
                 actionsToTry.remove(nAction);
             }
+            removedActions++;
         }
 
         //If we got here, we couldn't find an action that wouldn't kill me. We can take any, really.

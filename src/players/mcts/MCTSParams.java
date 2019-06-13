@@ -125,11 +125,27 @@ public class MCTSParams implements ParameterSet {
         clusterHeuristics.add(gs->
         {
             List<Float> ret = new ArrayList<>();
-            MultiHeuristicA sh = new MultiHeuristicA();
-            List<Double> values = sh.evaluateState(gs);
-            for(int i=0;i<values.size();i++){
-                double value = values.get(i);
-                ret.add( (float) value);
+            for(int shk: new Integer[] {0, 1, 2, 3, 4})
+            {
+                StateHeuristic sh;
+                if (shk == this.CUSTOM_HEURISTIC)
+                    sh = new CustomHeuristic(gs);
+                else if (shk == this.OUR_HEURISTIC)
+                    sh = new OurHeuristic();
+                else if (shk == this.ADVANCED_HEURISTIC) {
+                    Random rnd = new Random();
+                    sh = new AdvancedHeuristic(gs, rnd);
+                }
+                else if (shk == this.MULTI_HEURISTIC_A) {
+                    MultiHeuristicA multi = new MultiHeuristicA();
+                    for(Double d : multi.evaluateState(gs))
+                        ret.add(d.floatValue());
+                    continue;
+                }
+                else
+                    sh = new PlayerCountHeuristic();
+
+                ret.add( (float) sh.evaluateState(gs));
             }
             return ret;
         });
@@ -146,7 +162,7 @@ public class MCTSParams implements ParameterSet {
         parameterValues.put("nbrClustererCycles", new Integer[] {1});
         parameterValues.put("globalActionDistribution", new Boolean[] {true, false});
 
-        parameterValues.put("useDBScan", new Boolean[] {true});
+        parameterValues.put("useDBScan", new Boolean[] {true, false});
         parameterValues.put("distanceMeasure", new Integer[] {0,1,2,3});
         parameterValues.put("DBSscanMaxElements", new Integer[] {6,8,10,12});
         parameterValues.put("DBSscanMaxDist", new Float[] {.6f,.8f,1.0f,1.2f});
@@ -167,7 +183,7 @@ public class MCTSParams implements ParameterSet {
     @Override
     public Map<String, String[]> constantNames() {
         HashMap<String, String[]> names = new HashMap<>();
-        names.put("heuristic_method", new String[]{"CUSTOM_HEURISTIC", "ADVANCED_HEURISTIC", "OUR_HEURISTIC"});
+        names.put("heuristic_method", new String[]{"CUSTOM_HEURISTIC", "ADVANCED_HEURISTIC", "OUR_HEURISTIC", "MULTI_HEURISTIC"});
         return names;
     }
 }
