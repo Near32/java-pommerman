@@ -125,21 +125,11 @@ public class MCTSParams implements ParameterSet {
         clusterHeuristics.add(gs->
         {
             List<Float> ret = new ArrayList<>();
-            for(int shk: new Integer[] {0, 1, 2, 3})
-            {
-                StateHeuristic sh;
-                if (shk == this.CUSTOM_HEURISTIC)
-                    sh = new CustomHeuristic(gs);
-                else if (shk == this.OUR_HEURISTIC)
-                    sh = new OurHeuristic();
-                else if (shk == this.ADVANCED_HEURISTIC) {
-                    Random rnd = new Random();
-                    sh = new AdvancedHeuristic(gs, rnd);
-                }
-                else
-                    sh = new PlayerCountHeuristic();
-
-                ret.add( (float) sh.evaluateState(gs));
+            MultiHeuristicA sh = new MultiHeuristicA();
+            List<Double> values = sh.evaluateState(gs);
+            for(int i=0;i<values.size();i++){
+                double value = values.get(i);
+                ret.add( (float) value);
             }
             return ret;
         });
